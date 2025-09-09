@@ -39,4 +39,21 @@ router.post("/update-user-profile-picture-url", async ({ user, body }, res) => {
   }
 });
 
+router.post("/update-user-name", async ({ user, body }, res) => {
+  const { name } = body;
+
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user.id },
+      { name },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser);
+  } catch (e) {
+    console.error("Failed to update user profile name", e);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
