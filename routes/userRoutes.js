@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
     const userResponse = {
       email: user.email,
       id: user._id,
-      profilePictureUrl: user._profile_picture_url,
+      profilePictureUrl: user.profile_picture_url,
       name: user.name,
     };
 
@@ -22,36 +22,23 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/update-user-profile-picture-url", async ({ user, body }, res) => {
-  const { profilePictureUrl } = body;
+router.put("/", async ({ user, body }, res) => {
+  let updateQuery = {};
+
+  if (body.name !== undefined) updateQuery.name = body.name;
+  if (body.profilePictureUrl !== undefined)
+    updateQuery.profile_picture_url = body.profilePictureUrl;
 
   try {
     const updatedUser = await User.findOneAndUpdate(
       { _id: user.id },
-      { profile_picture_url: profilePictureUrl },
+      { $set: updateQuery },
       { new: true }
     );
 
     res.status(200).json(updatedUser);
   } catch (e) {
-    console.error("Failed to update user profile picture", e);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-router.post("/update-user-name", async ({ user, body }, res) => {
-  const { name } = body;
-
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: user.id },
-      { name },
-      { new: true }
-    );
-
-    res.status(200).json(updatedUser);
-  } catch (e) {
-    console.error("Failed to update user profile name", e);
+    console.error("Failed to update user", e);
     res.status(500).json({ error: "Server error" });
   }
 });
