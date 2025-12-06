@@ -11,6 +11,11 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.scope !== 'user') {
+      return res.status(401).json({ message: "Insufficient permissions" });
+    }
+
     req.user = decoded;
     next();
   } catch (error) {

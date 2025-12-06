@@ -1,6 +1,10 @@
 const express = require("express");
 const Module = require("../models/Module");
 
+const {
+  generateModuleToken,
+} = require("../utils/generateTokens");
+
 const router = express.Router();
 
 router.post("/register-module", async (req, res) => {
@@ -9,15 +13,19 @@ router.post("/register-module", async (req, res) => {
     let registeredModule = await Module.findOne({ device_id: deviceId });
 
     if (!registeredModule && secret === process.env.MODULE_PROVISION_SECRET) {
-        const module = new Module({ device_id: deviceId });
+        const modulesCount = await Module.countDocuments();
+        const module = new Module({ device_id: deviceId, name: `Clear Zone Module #${modulesCount + 1}` });
+
         module.save();
 
-        res.status(200).json({ registerd: true });
+        const { moduleToken } = generateModuleToken(deviceId);
+
+        res.status(200).json({ moduleToken, mqttUsername: process.env.HIVEMQ_USERNAME, mqttPass: process.env.HIVEMQ_PASS });
 
         return
     }
 
-    res.status(200).json({ registered: false });
+    res.status(400).json({ message: "Module is registered or isn't eligible for registration" });
 })
 
 module.exports = router;

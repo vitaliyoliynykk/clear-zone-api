@@ -1,14 +1,22 @@
 const jwt = require("jsonwebtoken");
 
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign({ id: userId, scope: 'user' }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
-  const refreshToken = jwt.sign({ id: userId }, process.env.REFRESH_SECRET, {
+  const refreshToken = jwt.sign({ id: userId, scope: 'user' }, process.env.REFRESH_SECRET, {
     expiresIn: "7d",
   });
 
   return { accessToken, refreshToken };
+};
+
+const generateModuleToken = (deviceId) => {
+  const moduleToken = jwt.sign({ deviceId, scope: 'device' }, process.env.JWT_SECRET, {
+    expiresIn: "365d",
+  });
+
+  return { moduleToken };
 };
 
 const generateNewAccessToken = (refreshToken) => {
@@ -24,4 +32,5 @@ module.exports = {
   generateTokens,
   generateNewAccessToken,
   REFRESH_TOKEN_EXPIRATION,
+  generateModuleToken
 };
