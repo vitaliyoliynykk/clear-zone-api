@@ -1,10 +1,11 @@
 const jwt = require("jsonwebtoken");
+const { JWT_SCOPE_MODULE, JWT_SCOPE_USER } = require('./constants');
 
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId, scope: 'user' }, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign({ id: userId, scope: JWT_SCOPE_USER }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
-  const refreshToken = jwt.sign({ id: userId, scope: 'user' }, process.env.REFRESH_SECRET, {
+  const refreshToken = jwt.sign({ id: userId, scope: JWT_SCOPE_USER }, process.env.REFRESH_SECRET, {
     expiresIn: "7d",
   });
 
@@ -12,7 +13,7 @@ const generateTokens = (userId) => {
 };
 
 const generateModuleToken = (deviceId) => {
-  const moduleToken = jwt.sign({ deviceId, scope: 'device' }, process.env.JWT_SECRET, {
+  const moduleToken = jwt.sign({ deviceId, scope: JWT_SCOPE_MODULE }, process.env.JWT_SECRET, {
     expiresIn: "365d",
   });
 
