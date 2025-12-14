@@ -44,6 +44,8 @@ router.post("/me", async (req, res) => {
         } else {
             res.status(403).json({ message: "Not Registered" });
         }
+
+        return;
     }
 
     res.status(401).json({ message: "Not Authorized" });
