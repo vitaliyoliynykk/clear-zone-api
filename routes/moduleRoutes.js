@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/link/:moduleId", async (req, res) => {
   try {
     const { moduleId } = req.params;
-    const module = Module.findOne({ device_id: moduleId });
+    const module = await Module.findOne({ device_id: moduleId });
 
     if (!module) {
       return res.status(404).json({ message: "Module not found" });
