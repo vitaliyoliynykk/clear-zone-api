@@ -22,7 +22,7 @@ router.post("/link/:moduleId", async (req, res) => {
     module.owner_id = req.user.id;
     await module.save();
 
-    res.json({ message: "Module linked successfully" });
+    res.status(200).json({ message: "Module linked successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
