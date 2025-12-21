@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const userRoutes = require("./routes/userRoutes");
 const moduleAuthRoutes = require("./routes/moduleAuthRoutes");
+const moduleRoutes = require("./routes/moduleRoutes");
 
 require("dotenv").config();
 
@@ -37,6 +38,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRoutes);
 app.use("/module-auth", moduleAuthRoutes);
+app.use("/module", authMiddleware, moduleRoutes);
 app.use("/settings", authMiddleware, settingsRoutes);
 app.use("/user", authMiddleware, userRoutes);
 
