@@ -40,4 +40,20 @@ router.get("/all", async (req, res) => {
   }
 });
 
+router.delete("/:moduleId", async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+
+    const modules = await Module.findOneAndDelete({
+      owner_id: req.user.id,
+      device_id: moduleId,
+    });
+
+    res.status(200).json(modules);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
