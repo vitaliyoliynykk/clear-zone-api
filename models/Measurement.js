@@ -18,7 +18,7 @@ const MeasurementSchema = new mongoose.Schema(
 
     sensor: {
       type: String,
-      enum: ["temp", "hum"],
+      enum: ["temp", "hum", "co2"],
       required: true,
     },
 
