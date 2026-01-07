@@ -12,6 +12,7 @@ const connectMqtt = (socketsByDevice, lastByDevice) => {
     const topics = {
       "devices/+/status": { qos: 1 },
       "devices/+/temp": { qos: 0 },
+      "devices/+/co2": { qos: 0 },
     };
 
     mqttClient.subscribe(topics, (err) => {
@@ -30,6 +31,9 @@ const connectMqtt = (socketsByDevice, lastByDevice) => {
         break;
       case "temp":
         handleTemp(deviceId, payload);
+        break;
+      case "co2":
+        handleCO2(deviceId, payload);
         break;
     }
   });
@@ -90,6 +94,23 @@ const handleTemp = async (device_id, payload) => {
   });
 
   console.log("[MQTT] Temp saved to DB");
+};
+
+const handleCO2 = async (device_id, payload) => {
+  const { co2 } = JSON.parse(payload.toString());
+
+  const module = await Module.findOne({ device_id });
+
+  await Measurement.create({
+    meta: {
+      module_id: module._id,
+    },
+    sensor: "co2",
+    value: co2,
+    unit: "ppm",
+  });
+
+  console.log("[MQTT] CO2 saved to DB");
 };
 
 module.exports = connectMqtt;
