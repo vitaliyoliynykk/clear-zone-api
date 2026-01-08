@@ -27,27 +27,51 @@ const connectMqtt = (socketsByDevice, lastByDevice) => {
 
     switch (type) {
       case "status":
-        handleStatus(deviceId, payload, packet, lastByDevice, socketsByDevice);
+        handleResendToWs(
+          deviceId,
+          payload,
+          packet,
+          lastByDevice,
+          socketsByDevice,
+          type
+        );
         break;
       case "temp":
         handleTemp(deviceId, payload);
+        handleResendToWs(
+          deviceId,
+          payload,
+          packet,
+          lastByDevice,
+          socketsByDevice,
+          type
+        );
         break;
       case "co2":
         handleCO2(deviceId, payload);
+        handleResendToWs(
+          deviceId,
+          payload,
+          packet,
+          lastByDevice,
+          socketsByDevice,
+          type
+        );
         break;
     }
   });
 };
 
-const handleStatus = (
+const handleResendToWs = (
   deviceId,
   payload,
   packet,
   lastByDevice,
-  socketsByDevice
+  socketsByDevice,
+  type
 ) => {
   const msg = JSON.stringify({
-    type: "status",
+    type,
     deviceId,
     ts: Date.now(),
     data: JSON.parse(payload.toString()),
@@ -57,7 +81,7 @@ const handleStatus = (
   if (!lastByDevice.has(deviceId)) {
     lastByDevice.set(deviceId, new Map());
   }
-  lastByDevice.get(deviceId).set("status", msg);
+  lastByDevice.get(deviceId).set(type, msg);
 
   const sockets = socketsByDevice.get(deviceId);
 
