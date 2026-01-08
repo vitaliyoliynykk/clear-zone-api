@@ -3,6 +3,8 @@ const { JWT_SCOPE_USER } = require("../utils/constants");
 const jwt = require("jsonwebtoken");
 const Module = require("../models/Module");
 
+const KEEP_ALIVE_INTERVAL_MS = 30000;
+
 const addDeviceIdToSocket = (deviceId, ws, socketsByDevice) => {
   if (!socketsByDevice.has(deviceId)) {
     socketsByDevice.set(deviceId, new Set());
@@ -43,7 +45,34 @@ const jwtAuth = (req) => {
 const connectWS = (socketsByDevice, lastByDevice) => {
   const wss = new WebSocketServer({ port: process.env.WS_PORT });
 
+  const keepAliveInterval = setInterval(() => {
+    wss.clients.forEach((socket) => {
+      if (socket.isAlive === false) {
+        socket.terminate();
+        return;
+      }
+
+      socket.isAlive = false;
+
+      if (socket.readyState === socket.OPEN) {
+        socket.ping();
+      }
+    });
+  }, KEEP_ALIVE_INTERVAL_MS);
+
+  if (typeof keepAliveInterval.unref === "function") {
+    keepAliveInterval.unref();
+  }
+
+  wss.on("close", () => {
+    clearInterval(keepAliveInterval);
+  });
+
   wss.on("connection", async (ws, req) => {
+    ws.isAlive = true;
+    ws.on("pong", () => {
+      ws.isAlive = true;
+    });
     try {
       const user = jwtAuth(req);
       ws.user = user;
