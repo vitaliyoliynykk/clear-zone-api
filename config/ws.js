@@ -73,6 +73,7 @@ const connectWS = (socketsByDevice, lastByDevice) => {
     ws.on("pong", () => {
       ws.isAlive = true;
     });
+
     try {
       const user = jwtAuth(req);
       ws.user = user;
