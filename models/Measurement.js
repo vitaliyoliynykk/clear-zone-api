@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { SENSORS } = require("../utils/constants");
 
 const MeasurementSchema = new mongoose.Schema(
   {
@@ -18,7 +19,7 @@ const MeasurementSchema = new mongoose.Schema(
 
     sensor: {
       type: String,
-      enum: ["temp", "hum", "co2"],
+      enum: SENSORS,
       required: true,
     },
 
