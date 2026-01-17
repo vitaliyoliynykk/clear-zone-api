@@ -12,6 +12,7 @@ const settingsRoutes = require("./routes/settingsRoutes");
 const userRoutes = require("./routes/userRoutes");
 const moduleAuthRoutes = require("./routes/moduleAuthRoutes");
 const moduleRoutes = require("./routes/moduleRoutes");
+const measurementRoutes = require("./routes/measurementRoutes");
 
 require("dotenv").config();
 
@@ -43,6 +44,7 @@ app.use("/module-auth", moduleAuthRoutes);
 app.use("/module", authMiddleware, moduleRoutes);
 app.use("/settings", authMiddleware, settingsRoutes);
 app.use("/user", authMiddleware, userRoutes);
+app.use("/measurement", authMiddleware, measurementRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
