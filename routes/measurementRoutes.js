@@ -5,19 +5,21 @@ const Measurement = require("../models/Measurement");
 const Module = require("../models/Module");
 
 const { SENSORS } = require("../utils/constants");
+const { getLookbackDate } = require("../utils/time");
 
 const router = express.Router();
 
 router.get("/aggregated/:moduleId/:sensor", async (req, res) => {
   try {
     const { sensor, moduleId } = req.params;
+    const { hoursLookback } = req.query;
 
     if (!SENSORS.includes(sensor)) {
       res.status(400).json({ message: "Invalid sensor" });
       return;
     }
 
-    const fromDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
+    const fromDate = getLookbackDate(hoursLookback);
 
     const module = await Module.findOne({ device_id: moduleId });
 
