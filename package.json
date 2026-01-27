@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
+    "start-api": "nodemon api.js",
+    "start-worker": "nodemon signals-worker.js",
+    "start": "concurrently \"npm run start-api\" \"npm run start-worker\"",
     "start-tunnel": "cloudflared tunnel --url http://localhost:4000"
   },
   "author": "Vitalii Oliinyk",
@@ -24,6 +26,7 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "nodemon": "^3.1.9"
   },
   "pnpm": {

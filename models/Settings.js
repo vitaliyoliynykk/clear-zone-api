@@ -8,7 +8,6 @@ const SettingsSchema = new mongoose.Schema({
     unique: true,
   },
   push_notifications_enabled: { type: Boolean, required: true },
-  pomodoro_configuration: { type: Object, required: false },
 });
 
 module.exports = mongoose.model("settings", SettingsSchema);
