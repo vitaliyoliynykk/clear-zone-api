@@ -136,7 +136,7 @@ const handlePMS = async (device_id, payload) => {
     meta: {
       module_id: module._id,
     },
-    sensor: "PM1.0",
+    sensor: "pm10",
     value: pm10,
     unit: "µg/m³",
   });
@@ -145,7 +145,7 @@ const handlePMS = async (device_id, payload) => {
     meta: {
       module_id: module._id,
     },
-    sensor: "PM2.5",
+    sensor: "pm25",
     value: pm25,
     unit: "µg/m³",
   });
@@ -154,7 +154,7 @@ const handlePMS = async (device_id, payload) => {
     meta: {
       module_id: module._id,
     },
-    sensor: "PM10",
+    sensor: "pm100",
     value: pm100,
     unit: "µg/m³",
   });
