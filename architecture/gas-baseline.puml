@@ -1,0 +1,31 @@
+@startuml Gas baseling calculation
+start
+
+:Отримати новий gas measurement;
+:Зчитати uptime;
+
+if (uptime < WARMUP_TIME?) then (так)
+  :state = WARMUP;
+  :baseline не оновлюється;
+  stop
+endif
+
+if (uptime < READY_TIME?) then (так)
+  :state = LEARNING;
+  :alpha = ALPHA_LEARNING;
+else
+  :state = READY;
+  :alpha = ALPHA_READY;
+endif
+
+:Оцінити умови чистоти повітря;
+
+if (CLEAN_THRESHOLD виконано?) then (так)
+  :baseline = EMA[(1 - alpha) * baseline + alpha * gas_resistance];
+  :baseline_updated_at = now;
+else
+  :baseline не оновлюється;
+endif
+
+stop
+@enduml

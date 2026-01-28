@@ -1,0 +1,32 @@
+@startuml Data layers
+package "Edge" {
+  [ESP32]
+}
+
+package "RAW layer" {
+  [measurements]
+  [gas_measurements]
+}
+
+package "STATE layer" {
+  [sensor_state]
+}
+
+package "SIGNALS layer" {
+  [sensor_signals]
+}
+
+package "IAQ layer" {
+  [iaq_history]
+}
+
+[ESP32] --> [measurements]
+[ESP32] --> [gas_measurements]
+
+[gas_measurements] --> [sensor_state] : baseline update
+[sensor_state] --> [sensor_signals] : read baseline
+[measurements] --> [sensor_signals]
+
+[sensor_signals] --> [iaq_history]
+
+@enduml
