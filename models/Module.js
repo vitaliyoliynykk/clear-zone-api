@@ -7,7 +7,7 @@ const ModuleSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "users",
         required: false,
-        unique: true,
+        unique: false,
         default: null
     },
     registration_date: { type: Date, required: false, default: Date.now },
