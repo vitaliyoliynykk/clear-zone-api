@@ -33,7 +33,7 @@ const MeasurementSchema = new mongoose.Schema(
       required: false,
     },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 module.exports = mongoose.model("measurements", MeasurementSchema);
