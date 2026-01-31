@@ -26,8 +26,6 @@ const connectMqtt = (socketsByDevice, lastByDevice) => {
   mqttClient.on("message", (topic, payload, packet) => {
     const [, deviceId, type] = topic.split("/");
 
-    // console.log("[MQTT]", deviceId, type, JSON.parse(payload.toString()));
-
     if (type !== "bme") {
       handleResendToWs(
         deviceId,

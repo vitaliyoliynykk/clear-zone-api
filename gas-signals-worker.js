@@ -1,58 +1,130 @@
 const connectDB = require("./config/db");
 
-const WorkerState = require("./models/WorkerState");
 const GasMesurement = require("./models/GasMeasurement");
+const VocSensorState = require("./models/VocSensorState");
+const {
+  getResistanceDeviationDelta,
+  getVocSensorState,
+} = require("./utils/voc-sensor");
 
 require("dotenv").config();
 
-const WORKER_NAME = "gas-signals-worker";
+let isWorkerRunning = false;
 
-const BATCH_LIMIT = 500;
-const ALPHA = 0.001;
+const ALPHA_CALIBRATING = 0.02;
+const ALPHA_READY = 0.005;
+const POLLUTION_THRESHOLD = 0.1;
+const OFFLINE_RESET_THRESHOLD_MS = 3600000; // 1 Hour
+const WARM_UP_SEC = 1200; // 15 Minutes
+const CALIBRARION_SEC = 28800; // 8 Hours
+const WORKER_POLLING_MS = 30000; // 30 Seconds
+const MODULES_BATCH_SIZE = 1; // Process each module in parallel
 
 connectDB();
 
-const setupWorkerState = async () => {
-  const workerState = await WorkerState.findOne({ worker_name: WORKER_NAME });
+const processModule = async (moduleId) => {
+  const sensorState = await VocSensorState.findOne({
+    module_id: moduleId,
+  });
 
-  if (!workerState) {
-    return await WorkerState.create({ worker_name: WORKER_NAME });
-  }
+  const query = sensorState?.last_processed_at
+    ? {
+        "meta.module_id": moduleId,
+        ts: { $gt: sensorState.last_processed_at },
+      }
+    : {
+        "meta.module_id": moduleId,
+      };
 
-  return workerState;
-};
+  const hasNewData = await GasMesurement.exists(query);
 
-const runWorker = async () => {
-  setInterval(async () => {
-    const workerState = await setupWorkerState();
-    let baseline = 0;
-    let counts = 0;
+  if (hasNewData) {
+    const newData = await GasMesurement.find(query).sort({ ts: 1 });
+    const latestRow = newData[newData.length - 1];
 
-    if (workerState) {
-      const query = workerState.last_processed_at
-        ? { ts: { $gt: workerState.last_processed_at } }
-        : {};
+    const latestState = getVocSensorState(latestRow.uptime_seconds);
 
-      const rows = await GasMesurement.find(query).sort({ ts: 1 }); // chronological order
+    let baseline =
+      sensorState?.baseline_gas_resistance ?? newData[0].gas_resistance;
 
-      console.time();
-      for (const row of rows) {
-        if (row.uptime_seconds > 1200) {
-          baseline = (1 - ALPHA) * baseline + ALPHA * row.gas_resistance;
-          counts++;
+    for (const [index, row] of newData.entries()) {
+      if (
+        row.uptime_seconds > WARM_UP_SEC &&
+        getResistanceDeviationDelta(row.gas_resistance, baseline) <=
+          POLLUTION_THRESHOLD
+      ) {
+        // Check time difference between records, in order to see if module went offline
+        const time_delta_ms = newData[index - 1]
+          ? row.ts - newData[index - 1].ts
+          : 0;
+
+        // Reset baseline if module was offline for more than a OFFLINE_RESET_THRESHOLD_MS
+        if (time_delta_ms >= OFFLINE_RESET_THRESHOLD_MS) {
+          baseline = row.gas_resistance;
+        } else {
+          const alpha =
+            row.uptime_seconds <= CALIBRARION_SEC
+              ? ALPHA_CALIBRATING
+              : ALPHA_READY;
+
+          baseline = (1 - alpha) * baseline + alpha * row.gas_resistance;
         }
       }
-      console.timeEnd();
-
-      // console.log(rows[rows.length - 1]);
-
-      const lastProcessedAt = rows[rows.length - 1].ts;
-
-      console.log(
-        `Baseline for last ${rows.length} rows: ${Math.round(baseline)} (${lastProcessedAt}), Counts: ${counts}`,
-      );
     }
-  }, 5000);
+
+    if (sensorState) {
+      sensorState.state = latestState;
+      sensorState.last_processed_at = latestRow.ts;
+      sensorState.uptime_seconds = latestRow.uptime_seconds;
+      sensorState.baseline_gas_resistance = baseline;
+
+      await sensorState.save();
+    } else {
+      await VocSensorState.create({
+        state: latestState,
+        last_processed_at: latestRow.ts,
+        uptime_seconds: latestRow.uptime_seconds,
+        baseline_gas_resistance: baseline,
+        module_id: moduleId,
+      });
+    }
+  }
+};
+
+const processModulesInBatches = async (moduleIds, processModule) => {
+  if (!moduleIds || !moduleIds.length) return;
+
+  for (let i = 0; i < moduleIds.length; i += MODULES_BATCH_SIZE) {
+    const modulesBatch = moduleIds.slice(i, i + MODULES_BATCH_SIZE);
+
+    await Promise.all(
+      modulesBatch.map(async (moduleId) => {
+        try {
+          await processModule(moduleId);
+        } catch (e) {
+          console.error(`Module ${moduleId} failed. Error:  `, e);
+        }
+      }),
+    );
+  }
+};
+
+const updateVocBaselineForModules = async () => {
+  const moduleIds = await GasMesurement.distinct("meta.module_id");
+
+  await processModulesInBatches(moduleIds, processModule);
+};
+
+const runWorker = () => {
+  setInterval(async () => {
+    if (isWorkerRunning) return;
+    try {
+      isWorkerRunning = true;
+      await updateVocBaselineForModules();
+    } finally {
+      isWorkerRunning = false;
+    }
+  }, WORKER_POLLING_MS);
 };
 
 runWorker();

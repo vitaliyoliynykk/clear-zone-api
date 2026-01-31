@@ -99,7 +99,6 @@ const connectWS = (socketsByDevice, lastByDevice) => {
     }
 
     ws.on("close", async () => {
-      console.log("[Web Socket] Client disconnected");
       for (const { device_id } of userModules) {
         removeDeviceIdFromSocket(device_id, ws, socketsByDevice);
       }
