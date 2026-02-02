@@ -14,7 +14,7 @@ require("dotenv").config();
 const ALPHA_CALIBRATING = 0.02;
 const ALPHA_READY = 0.005;
 const POLLUTION_THRESHOLD = 0.1;
-const OFFLINE_RESET_THRESHOLD_MS = 3600000; // 1 Hour
+const OFFLINE_RESET_THRESHOLD_MS = 14400000; // 4 Hours
 const WORKER_POLLING_MS = 30000; // 30 Seconds
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
 
