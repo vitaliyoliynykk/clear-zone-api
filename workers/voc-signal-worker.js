@@ -67,7 +67,7 @@ const processModule = async (moduleId) => {
       dataToWrite.push({
         ts: data.ts,
         meta: { module_id: moduleId },
-        voc_index: vocIndex,
+        voc_index: Math.round(vocIndex),
         deviation,
         baseline_snapshot: sensorState.baseline_gas_resistance,
       });

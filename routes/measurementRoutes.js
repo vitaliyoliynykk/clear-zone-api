@@ -10,19 +10,21 @@ const { getLookbackDate, getBinSize } = require("../utils/time");
 
 const router = express.Router();
 
-router.get("/aggregated/voc/:moduleId", async (req, res) => {
+router.get("/aggregated/voc/:deviceId", async (req, res) => {
   try {
-    const { moduleId } = req.params;
+    const { deviceId } = req.params;
     const { hoursLookback } = req.query;
 
     const fromDate = getLookbackDate(hoursLookback);
     const binSize = getBinSize(hoursLookback);
 
+    const module = await Module.findOne({ device_id: deviceId });
+
     const result = await VocSignal.aggregate([
       {
         $match: {
           ts: { $gte: fromDate },
-          "meta.module_id": moduleId,
+          "meta.module_id": module._id,
         },
       },
       {
@@ -118,7 +120,11 @@ router.get("/voc/latest/:moduleId", async (req, res) => {
       .sort({ ts: -1 })
       .limit(1);
 
-    res.status(200).json(latestVoc || null);
+    res
+      .status(200)
+      .json(
+        latestVoc ? { index: latestVoc.voc_index, date: latestVoc.ts } : null,
+      );
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
