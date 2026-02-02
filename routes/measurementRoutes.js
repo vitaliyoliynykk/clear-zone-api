@@ -6,9 +6,55 @@ const VocSignal = require("../models/VocSignal");
 const Module = require("../models/Module");
 
 const { SENSORS } = require("../utils/constants");
-const { getLookbackDate } = require("../utils/time");
+const { getLookbackDate, getBinSize } = require("../utils/time");
 
 const router = express.Router();
+
+router.get("/aggregated/voc/:moduleId", async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+    const { hoursLookback } = req.query;
+
+    const fromDate = getLookbackDate(hoursLookback);
+    const binSize = getBinSize(hoursLookback);
+
+    const result = await VocSignal.aggregate([
+      {
+        $match: {
+          ts: { $gte: fromDate },
+          "meta.module_id": moduleId,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateTrunc: {
+              date: "$ts",
+              unit: "minute",
+              binSize,
+            },
+          },
+          value: { $max: "$voc_index" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          value: { $round: ["$value", 0] },
+        },
+      },
+      {
+        $sort: { date: 1 },
+      },
+    ]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
   try {
@@ -21,6 +67,7 @@ router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
     }
 
     const fromDate = getLookbackDate(hoursLookback);
+    const binSize = getBinSize(hoursLookback);
 
     const module = await Module.findOne({ device_id: deviceId });
 
@@ -38,7 +85,7 @@ router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
             $dateTrunc: {
               date: "$ts",
               unit: "minute",
-              binSize: 10,
+              binSize,
             },
           },
           value: { $avg: "$value" },
@@ -67,7 +114,7 @@ router.get("/voc/latest/:moduleId", async (req, res) => {
   try {
     const { moduleId } = req.params;
 
-    const latestVoc = await Module.findOne({ "meta.module_id": moduleId })
+    const latestVoc = await VocSignal.findOne({ "meta.module_id": moduleId })
       .sort({ ts: -1 })
       .limit(1);
 
