@@ -13,4 +13,11 @@ const getVocSensorState = (uptimeSeconds) => {
   }
 };
 
-module.exports = { getResistanceDeviationDelta, getVocSensorState };
+const calculateVocIndex = (deviation) =>
+  clamp(Math.log1p(deviation * 10) * 200, 0, 500);
+
+module.exports = {
+  getResistanceDeviationDelta,
+  getVocSensorState,
+  calculateVocIndex,
+};

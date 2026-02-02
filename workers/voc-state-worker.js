@@ -7,6 +7,7 @@ const {
   getVocSensorState,
   getResistanceDeviationDelta,
 } = require("../utils/voc-sensor");
+const { processInBatches } = require("../utils/workers");
 const { Worker } = require("./worker");
 
 require("dotenv").config();
@@ -14,6 +15,7 @@ require("dotenv").config();
 const ALPHA_CALIBRATING = 0.02;
 const ALPHA_READY = 0.005;
 const POLLUTION_THRESHOLD = 0.1;
+const HUMIDITY_THRESHOLD = 70;
 const OFFLINE_RESET_THRESHOLD_MS = 14400000; // 4 Hours
 const WORKER_POLLING_MS = 30000; // 30 Seconds
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
@@ -22,6 +24,17 @@ const VocStateWorker = new Worker(WORKER_POLLING_MS);
 
 connectDB();
 
+const calculateAlpha = (data) => {
+  const alpha =
+    row.uptime_seconds <= VOC_CALIBRARION_SEC ? ALPHA_CALIBRATING : ALPHA_READY;
+
+  // Slow down baseline update if humidity is high
+  if (row.humidity > HUMIDITY_THRESHOLD) {
+    return alpha * 0.02;
+  }
+
+  return alpha;
+};
 const processModule = async (moduleId) => {
   const sensorState = await VocSensorState.findOne({
     module_id: moduleId,
@@ -62,10 +75,7 @@ const processModule = async (moduleId) => {
         if (time_delta_ms >= OFFLINE_RESET_THRESHOLD_MS) {
           baseline = row.gas_resistance;
         } else {
-          const alpha =
-            row.uptime_seconds <= VOC_CALIBRARION_SEC
-              ? ALPHA_CALIBRATING
-              : ALPHA_READY;
+          const alpha = calculateAlpha(row);
 
           baseline = (1 - alpha) * baseline + alpha * row.gas_resistance;
         }
@@ -91,28 +101,10 @@ const processModule = async (moduleId) => {
   }
 };
 
-const processModulesInBatches = async (moduleIds, processModule) => {
-  if (!moduleIds || !moduleIds.length) return;
-
-  for (let i = 0; i < moduleIds.length; i += MODULES_BATCH_SIZE) {
-    const modulesBatch = moduleIds.slice(i, i + MODULES_BATCH_SIZE);
-
-    await Promise.all(
-      modulesBatch.map(async (moduleId) => {
-        try {
-          await processModule(moduleId);
-        } catch (e) {
-          console.error(`Module ${moduleId} failed. Error:  `, e);
-        }
-      }),
-    );
-  }
-};
-
 const updateVocBaselineForModules = async () => {
   const moduleIds = await GasMesurement.distinct("meta.module_id");
 
-  await processModulesInBatches(moduleIds, processModule);
+  await processInBatches(moduleIds, MODULES_BATCH_SIZE, processModule);
 };
 
 VocStateWorker.run(updateVocBaselineForModules);

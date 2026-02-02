@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-api": "nodemon api.js",
     "start-voc-state-worker": "nodemon ./workers/voc-state-worker.js",
+    "start-voc-signal-worker": "nodemon ./workers/voc-signal-worker.js",
     "start": "concurrently \"npm run start-api\" \"npm run start-worker\"",
     "start-tunnel": "cloudflared tunnel --url http://localhost:4000"
   },
