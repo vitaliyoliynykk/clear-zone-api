@@ -1,4 +1,5 @@
 const { VOC_WARM_UP_SEC, VOC_CALIBRARION_SEC } = require("./constants");
+const { clamp } = require("./math");
 
 const getResistanceDeviationDelta = (gas_resistance, baseline) =>
   (baseline - gas_resistance) / baseline;
