@@ -1,24 +1,24 @@
-const connectDB = require("./config/db");
+const connectDB = require("../config/db");
 
-const GasMesurement = require("./models/GasMeasurement");
-const VocSensorState = require("./models/VocSensorState");
+const GasMesurement = require("../models/GasMeasurement");
+const VocSensorState = require("../models/VocSensorState");
+const { VOC_WARM_UP_SEC, VOC_CALIBRARION_SEC } = require("../utils/constants");
 const {
-  getResistanceDeviationDelta,
   getVocSensorState,
-} = require("./utils/voc-sensor");
+  getResistanceDeviationDelta,
+} = require("../utils/voc-sensor");
+const { Worker } = require("./worker");
 
 require("dotenv").config();
-
-let isWorkerRunning = false;
 
 const ALPHA_CALIBRATING = 0.02;
 const ALPHA_READY = 0.005;
 const POLLUTION_THRESHOLD = 0.1;
 const OFFLINE_RESET_THRESHOLD_MS = 3600000; // 1 Hour
-const WARM_UP_SEC = 1200; // 15 Minutes
-const CALIBRARION_SEC = 28800; // 8 Hours
 const WORKER_POLLING_MS = 30000; // 30 Seconds
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
+
+const VocStateWorker = new Worker(WORKER_POLLING_MS);
 
 connectDB();
 
@@ -49,7 +49,7 @@ const processModule = async (moduleId) => {
 
     for (const [index, row] of newData.entries()) {
       if (
-        row.uptime_seconds > WARM_UP_SEC &&
+        row.uptime_seconds > VOC_WARM_UP_SEC &&
         getResistanceDeviationDelta(row.gas_resistance, baseline) <=
           POLLUTION_THRESHOLD
       ) {
@@ -63,7 +63,7 @@ const processModule = async (moduleId) => {
           baseline = row.gas_resistance;
         } else {
           const alpha =
-            row.uptime_seconds <= CALIBRARION_SEC
+            row.uptime_seconds <= VOC_CALIBRARION_SEC
               ? ALPHA_CALIBRATING
               : ALPHA_READY;
 
@@ -115,16 +115,4 @@ const updateVocBaselineForModules = async () => {
   await processModulesInBatches(moduleIds, processModule);
 };
 
-const runWorker = () => {
-  setInterval(async () => {
-    if (isWorkerRunning) return;
-    try {
-      isWorkerRunning = true;
-      await updateVocBaselineForModules();
-    } finally {
-      isWorkerRunning = false;
-    }
-  }, WORKER_POLLING_MS);
-};
-
-runWorker();
+VocStateWorker.run(updateVocBaselineForModules);
