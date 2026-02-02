@@ -26,10 +26,12 @@ connectDB();
 
 const calculateAlpha = (data) => {
   const alpha =
-    row.uptime_seconds <= VOC_CALIBRARION_SEC ? ALPHA_CALIBRATING : ALPHA_READY;
+    data.uptime_seconds <= VOC_CALIBRARION_SEC
+      ? ALPHA_CALIBRATING
+      : ALPHA_READY;
 
   // Slow down baseline update if humidity is high
-  if (row.humidity > HUMIDITY_THRESHOLD) {
+  if (data.humidity > HUMIDITY_THRESHOLD) {
     return alpha * 0.02;
   }
 
