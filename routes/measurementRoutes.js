@@ -2,6 +2,7 @@ const express = require("express");
 const { Types } = require("mongoose");
 
 const Measurement = require("../models/Measurement");
+const VocSignal = require("../models/VocSignal");
 const Module = require("../models/Module");
 
 const { SENSORS } = require("../utils/constants");
@@ -9,9 +10,9 @@ const { getLookbackDate } = require("../utils/time");
 
 const router = express.Router();
 
-router.get("/aggregated/:moduleId/:sensor", async (req, res) => {
+router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
   try {
-    const { sensor, moduleId } = req.params;
+    const { sensor, deviceId } = req.params;
     const { hoursLookback } = req.query;
 
     if (!SENSORS.includes(sensor)) {
@@ -21,7 +22,7 @@ router.get("/aggregated/:moduleId/:sensor", async (req, res) => {
 
     const fromDate = getLookbackDate(hoursLookback);
 
-    const module = await Module.findOne({ device_id: moduleId });
+    const module = await Module.findOne({ device_id: deviceId });
 
     const result = await Measurement.aggregate([
       {
@@ -56,6 +57,21 @@ router.get("/aggregated/:moduleId/:sensor", async (req, res) => {
     ]);
 
     res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/voc/latest/:moduleId", async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+
+    const latestVoc = await Module.findOne({ "meta.module_id": moduleId })
+      .sort({ ts: -1 })
+      .limit(1);
+
+    res.status(200).json(latestVoc || null);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
