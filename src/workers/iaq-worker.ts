@@ -5,24 +5,25 @@ import { VocSignalModel } from "../models/VocSignal";
 import { Types } from "mongoose";
 import { SENSORS_IAQ_CONFIG } from "../utils/iaq";
 import { SensorType } from "../types";
+import { IaqScoreModel } from "../models/IaqScore";
 
 const Measurement = require("../models/Measurement");
 
-const WORKER_POLLING_MS = 5000; // 30 Seconds
+const WORKER_POLLING_MS = 60000; // 60 Seconds
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
 
 const IaqWorker = new Worker(WORKER_POLLING_MS);
 
 connectDB();
 
-const processModule = async (moduleId: Types.ObjectId) => {
+const processModule = async (module_id: Types.ObjectId) => {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
   const sensorsData = await Measurement.aggregate([
     {
       $match: {
         ts: { $gte: tenMinutesAgo },
-        "meta.module_id": moduleId,
+        "meta.module_id": module_id,
       },
     },
     {
@@ -44,7 +45,7 @@ const processModule = async (moduleId: Types.ObjectId) => {
     {
       $match: {
         ts: { $gte: tenMinutesAgo },
-        "meta.module_id": moduleId,
+        "meta.module_id": module_id,
       },
     },
     {
@@ -63,21 +64,26 @@ const processModule = async (moduleId: Types.ObjectId) => {
   ]);
 
   if (sensorsData.length && vocData.length) {
-    const data = [...sensorsData, ...vocData];
+    const allSensorsData = [...sensorsData, ...vocData];
 
     let sum = 0;
     let weightSum = 0;
 
-    for (const item of data) {
-      const config = SENSORS_IAQ_CONFIG[item.sensor as SensorType];
-      const score = config.subScoreCalculator(item.value);
+    for (const { sensor, value } of allSensorsData) {
+      const { weight, subScoreCalculator } =
+        SENSORS_IAQ_CONFIG[sensor as SensorType];
+      const score = subScoreCalculator(value);
 
-      sum += score * config.weight;
-      weightSum += config.weight;
+      sum += score * weight;
+      weightSum += weight;
     }
 
-    const iaqScore = weightSum ? sum / weightSum : null;
-    console.log({ iaqScore: Math.round(iaqScore), moduleId });
+    const score = weightSum ? sum / weightSum : null;
+
+    await IaqScoreModel.insertOne({
+      meta: { module_id },
+      score: Math.round(score),
+    });
   }
 };
 

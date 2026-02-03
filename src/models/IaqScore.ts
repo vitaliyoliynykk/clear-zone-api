@@ -1,4 +1,4 @@
-import mongoose, { Types, Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { IaqScore } from "../types";
 
 const IaqScoresSchema = new mongoose.Schema<IaqScore>(

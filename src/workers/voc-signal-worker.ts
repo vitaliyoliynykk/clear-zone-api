@@ -61,7 +61,7 @@ const processModule = async (moduleId: Types.ObjectId): Promise<void> => {
       // Resistance is higher than baseline -> Air is clean
       if (!Number.isFinite(deviation) || deviation <= 0) {
         vocIndex = 0;
-        // Lower resistence means pollution
+        // Lower resistance means pollution
       } else {
         // Non-linear normalization of voc deviation to [0,500]
         vocIndex = calculateVocIndex(deviation);
