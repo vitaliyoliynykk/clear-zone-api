@@ -34,4 +34,6 @@ const VocSignalSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
+VocSignalSchema.index({ "meta.module_id": 1, ts: 1 });
+
 module.exports = mongoose.model("voc_signals", VocSignalSchema);

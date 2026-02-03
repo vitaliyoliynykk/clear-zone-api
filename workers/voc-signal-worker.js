@@ -1,7 +1,7 @@
 const connectDB = require("../config/db");
 
 const VocSensorState = require("../models/VocSensorState");
-const GasMesurement = require("../models/GasMeasurement");
+const GasMeasurement = require("../models/GasMeasurement");
 const VocSignal = require("../models/VocSignal");
 
 const { Worker } = require("./worker");
@@ -36,14 +36,14 @@ const processModule = async (moduleId) => {
         "meta.module_id": moduleId,
       };
 
-  const hasNewData = await GasMesurement.exists(query);
+  const hasNewData = await GasMeasurement.exists(query);
 
   if (hasNewData) {
     const sensorState = await VocSensorState.findOne({ module_id: moduleId });
 
     if (!sensorState || sensorState.baseline_gas_resistance <= 0) return;
 
-    const newData = await GasMesurement.find(query).sort({ ts: 1 });
+    const newData = await GasMeasurement.find(query).sort({ ts: 1 });
 
     const dataToWrite = [];
 

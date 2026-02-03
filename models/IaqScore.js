@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const GasMesurementSchema = new mongoose.Schema(
+const IaqScoresSchema = new mongoose.Schema(
   {
     ts: {
       type: Date,
@@ -14,15 +14,7 @@ const GasMesurementSchema = new mongoose.Schema(
         required: true,
       },
     },
-    gas_resistance: {
-      type: Number,
-      required: true,
-    },
-    humidity: {
-      type: Number,
-      required: true,
-    },
-    uptime_seconds: {
+    score: {
       type: Number,
       required: true,
     },
@@ -30,6 +22,6 @@ const GasMesurementSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
-GasMesurementSchema.index({ "meta.module_id": 1, ts: 1 });
+IaqScoresSchema.index({ "meta.module_id": 1, ts: 1 });
 
-module.exports = mongoose.model("gas_measurements", GasMesurementSchema);
+module.exports = mongoose.model("iaq_scores", IaqScoresSchema);

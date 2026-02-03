@@ -1,8 +1,8 @@
 const connectDB = require("../config/db");
 
-const GasMesurement = require("../models/GasMeasurement");
+const GasMeasurement = require("../models/GasMeasurement");
 const VocSensorState = require("../models/VocSensorState");
-const { VOC_WARM_UP_SEC, VOC_CALIBRARION_SEC } = require("../utils/constants");
+const { VOC_WARM_UP_SEC, VOC_CALIBRATION_SEC } = require("../utils/constants");
 const {
   getVocSensorState,
   getResistanceDeviationDelta,
@@ -26,7 +26,7 @@ connectDB();
 
 const calculateAlpha = (data) => {
   const alpha =
-    data.uptime_seconds <= VOC_CALIBRARION_SEC
+    data.uptime_seconds <= VOC_CALIBRATION_SEC
       ? ALPHA_CALIBRATING
       : ALPHA_READY;
 
@@ -51,10 +51,10 @@ const processModule = async (moduleId) => {
         "meta.module_id": moduleId,
       };
 
-  const hasNewData = await GasMesurement.exists(query);
+  const hasNewData = await GasMeasurement.exists(query);
 
   if (hasNewData) {
-    const newData = await GasMesurement.find(query).sort({ ts: 1 });
+    const newData = await GasMeasurement.find(query).sort({ ts: 1 });
     const latestRow = newData[newData.length - 1];
 
     const latestState = getVocSensorState(latestRow.uptime_seconds);
@@ -104,7 +104,7 @@ const processModule = async (moduleId) => {
 };
 
 const updateVocBaselineForModules = async () => {
-  const moduleIds = await GasMesurement.distinct("meta.module_id");
+  const moduleIds = await GasMeasurement.distinct("meta.module_id");
 
   await processInBatches(moduleIds, MODULES_BATCH_SIZE, processModule);
 };
