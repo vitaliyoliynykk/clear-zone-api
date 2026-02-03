@@ -57,7 +57,7 @@ iaqRoutes.get("/", async (req: Request, res: Response) => {
       },
     ]);
 
-    res.status(200).json({ latestScores });
+    res.status(200).json(latestScores);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
