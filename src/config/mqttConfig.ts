@@ -1,7 +1,8 @@
+import { GasMeasurementModel } from "../models/GasMeasurement";
+
 const mqtt = require("mqtt");
 const Module = require("../models/Module");
 const Measurement = require("../models/Measurement");
-const GasMeasurement = require("../models/GasMeasurement");
 
 const connectMqtt = (socketsByDevice, lastByDevice) => {
   const mqttClient = mqtt.connect(process.env.HIVE_MQ_HOST, {
@@ -165,7 +166,7 @@ const handleBME = async (device_id, payload) => {
 
   const module = await Module.findOne({ device_id });
 
-  await GasMeasurement.create({
+  await GasMeasurementModel.create({
     meta: {
       module_id: module._id,
     },

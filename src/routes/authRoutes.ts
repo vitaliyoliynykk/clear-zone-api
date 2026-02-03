@@ -1,4 +1,5 @@
-const express = require("express");
+import { Request, Response, Router } from "express";
+
 const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
@@ -9,9 +10,9 @@ const {
   REFRESH_TOKEN_EXPIRATION,
 } = require("../utils/generateTokens");
 
-const router = express.Router();
+const router = Router();
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -38,7 +39,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -70,7 +71,7 @@ router.post("/login", async (req, res) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
+        sameSite: "none",
         maxAge: REFRESH_TOKEN_EXPIRATION,
       })
       .json({ accessToken, user: userResponse });
@@ -105,13 +106,13 @@ router.post("/logout", async (req, res) => {
     try {
       await User.updateOne(
         { refresh_token },
-        { $unset: { refresh_token: null } }
+        { $unset: { refresh_token: null } },
       );
 
       res.clearCookie("refreshToken", {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
+        sameSite: "none",
       });
       res.status(200).json({ message: "ok" });
     } catch (e) {

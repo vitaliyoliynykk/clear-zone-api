@@ -1,17 +1,19 @@
+import { GasMeasurementModel } from "../models/GasMeasurement";
+import { Worker } from "./worker";
+import dotenv from "dotenv";
+
 const connectDB = require("../config/db");
 
 const VocSensorState = require("../models/VocSensorState");
-const GasMeasurement = require("../models/GasMeasurement");
 const VocSignal = require("../models/VocSignal");
 
-const { Worker } = require("./worker");
 const { processInBatches } = require("../utils/workers");
 const {
   getResistanceDeviationDelta,
   calculateVocIndex,
 } = require("../utils/voc-sensor");
 
-require("dotenv").config();
+dotenv.config();
 
 const WORKER_POLLING_MS = 30000; // 30 Seconds
 const MODULES_BATCH_SIZE = 1;
@@ -20,7 +22,7 @@ const VocSignalWorker = new Worker(WORKER_POLLING_MS);
 
 connectDB();
 
-const processModule = async (moduleId) => {
+const processModule = async (moduleId: string): Promise<void> => {
   const latestSignal = await VocSignal.findOne({
     "meta.module_id": moduleId,
   })
@@ -36,14 +38,14 @@ const processModule = async (moduleId) => {
         "meta.module_id": moduleId,
       };
 
-  const hasNewData = await GasMeasurement.exists(query);
+  const hasNewData = await GasMeasurementModel.exists(query);
 
   if (hasNewData) {
     const sensorState = await VocSensorState.findOne({ module_id: moduleId });
 
     if (!sensorState || sensorState.baseline_gas_resistance <= 0) return;
 
-    const newData = await GasMeasurement.find(query).sort({ ts: 1 });
+    const newData = await GasMeasurementModel.find(query).sort({ ts: 1 });
 
     const dataToWrite = [];
 

@@ -1,6 +1,8 @@
-const connectDB = require("../config/db");
+import { GasMeasurement, GasMeasurementModel } from "../models/GasMeasurement";
+import { Worker } from "./worker";
+import dotenv from "dotenv";
 
-const GasMeasurement = require("../models/GasMeasurement");
+const connectDB = require("../config/db");
 const VocSensorState = require("../models/VocSensorState");
 const { VOC_WARM_UP_SEC, VOC_CALIBRATION_SEC } = require("../utils/constants");
 const {
@@ -8,9 +10,8 @@ const {
   getResistanceDeviationDelta,
 } = require("../utils/voc-sensor");
 const { processInBatches } = require("../utils/workers");
-const { Worker } = require("./worker");
 
-require("dotenv").config();
+dotenv.config();
 
 const ALPHA_CALIBRATING = 0.02;
 const ALPHA_READY = 0.005;
@@ -24,7 +25,7 @@ const VocStateWorker = new Worker(WORKER_POLLING_MS);
 
 connectDB();
 
-const calculateAlpha = (data) => {
+const calculateAlpha = (data: GasMeasurement): number => {
   const alpha =
     data.uptime_seconds <= VOC_CALIBRATION_SEC
       ? ALPHA_CALIBRATING
@@ -37,7 +38,7 @@ const calculateAlpha = (data) => {
 
   return alpha;
 };
-const processModule = async (moduleId) => {
+const processModule = async (moduleId: string): Promise<void> => {
   const sensorState = await VocSensorState.findOne({
     module_id: moduleId,
   });
@@ -51,10 +52,10 @@ const processModule = async (moduleId) => {
         "meta.module_id": moduleId,
       };
 
-  const hasNewData = await GasMeasurement.exists(query);
+  const hasNewData = await GasMeasurementModel.exists(query);
 
   if (hasNewData) {
-    const newData = await GasMeasurement.find(query).sort({ ts: 1 });
+    const newData = await GasMeasurementModel.find(query).sort({ ts: 1 });
     const latestRow = newData[newData.length - 1];
 
     const latestState = getVocSensorState(latestRow.uptime_seconds);
@@ -70,7 +71,7 @@ const processModule = async (moduleId) => {
       ) {
         // Check time difference between records, in order to see if module went offline
         const time_delta_ms = newData[index - 1]
-          ? row.ts - newData[index - 1].ts
+          ? row.ts.getTime() - newData[index - 1].ts.getTime()
           : 0;
 
         // Reset baseline if module was offline for more than a OFFLINE_RESET_THRESHOLD_MS
@@ -103,8 +104,8 @@ const processModule = async (moduleId) => {
   }
 };
 
-const updateVocBaselineForModules = async () => {
-  const moduleIds = await GasMeasurement.distinct("meta.module_id");
+const updateVocBaselineForModules = async (): Promise<void> => {
+  const moduleIds = await GasMeasurementModel.distinct("meta.module_id");
 
   await processInBatches(moduleIds, MODULES_BATCH_SIZE, processModule);
 };
