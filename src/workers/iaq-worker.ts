@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import { SENSORS_IAQ_CONFIG } from "../utils/iaq";
 import { SensorType } from "../types";
 import { IaqScoreModel } from "../models/IaqScore";
+import { getDateMinutesAgo } from "../utils/time";
 
 const Measurement = require("../models/Measurement");
 
@@ -17,7 +18,7 @@ const IaqWorker = new Worker(WORKER_POLLING_MS);
 connectDB();
 
 const processModule = async (module_id: Types.ObjectId) => {
-  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const tenMinutesAgo = getDateMinutesAgo(10);
 
   const sensorsData = await Measurement.aggregate([
     {

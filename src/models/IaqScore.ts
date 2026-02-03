@@ -23,7 +23,7 @@ const IaqScoresSchema = new mongoose.Schema<IaqScore>(
   { versionKey: false },
 );
 
-IaqScoresSchema.index({ "meta.module_id": 1, ts: 1 });
+IaqScoresSchema.index({ "meta.module_id": 1, ts: -1 });
 
 export const IaqScoreModel: Model<IaqScore> = mongoose.model<IaqScore>(
   "iaq_scores",

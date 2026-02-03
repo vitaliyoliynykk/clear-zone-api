@@ -1,3 +1,5 @@
+import { iaqRoutes } from "./routes/iaqRoutes";
+
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -43,6 +45,7 @@ app.use("/module", authMiddleware, moduleRoutes);
 app.use("/settings", authMiddleware, settingsRoutes);
 app.use("/user", authMiddleware, userRoutes);
 app.use("/measurement", authMiddleware, measurementRoutes);
+app.use("/iaq", authMiddleware, iaqRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
