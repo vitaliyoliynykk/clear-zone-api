@@ -1,7 +1,8 @@
+import { SensorType } from "../types";
 import { scoreBand, scoreLowerIsBetter } from "./math";
 
 export const SENSORS_IAQ_CONFIG: Record<
-  SensorType | "voc",
+  SensorType,
   { weight: number; subScoreCalculator: (rawValue: number) => number }
 > = {
   co2: {
@@ -38,5 +39,3 @@ export const SENSORS_IAQ_CONFIG: Record<
 };
 
 export const SENSORS = ["temp", "hum", "co2", "pm10", "pm25", "pm100"] as const;
-
-export type SensorType = (typeof SENSORS)[number];

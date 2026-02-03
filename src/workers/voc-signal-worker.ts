@@ -1,6 +1,6 @@
 import { GasMeasurementModel } from "../models/GasMeasurement";
 import { VocSensorStateModel } from "../models/VocSensorState";
-import { VocSignal, VocSignalModel } from "../models/VocSignal";
+import { VocSignalModel } from "../models/VocSignal";
 import { Worker } from "./worker";
 import dotenv from "dotenv";
 import { Types } from "mongoose";
@@ -10,6 +10,7 @@ import {
 } from "../utils/voc-sensor";
 import { processInBatches } from "../utils/workers";
 import { connectDB } from "../config/db";
+import { VocSignal } from "../types";
 
 dotenv.config();
 

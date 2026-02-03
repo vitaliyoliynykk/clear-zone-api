@@ -3,7 +3,8 @@ import { connectDB } from "../config/db";
 import { processInBatches } from "../utils/workers";
 import { VocSignalModel } from "../models/VocSignal";
 import { Types } from "mongoose";
-import { SENSORS_IAQ_CONFIG, SensorType } from "../utils/iaq";
+import { SENSORS_IAQ_CONFIG } from "../utils/iaq";
+import { SensorType } from "../types";
 
 const Measurement = require("../models/Measurement");
 
@@ -64,13 +65,18 @@ const processModule = async (moduleId: Types.ObjectId) => {
   if (sensorsData.length && vocData.length) {
     const data = [...sensorsData, ...vocData];
 
-    let iaqScore = 0;
+    let sum = 0;
+    let weightSum = 0;
 
     for (const item of data) {
       const config = SENSORS_IAQ_CONFIG[item.sensor as SensorType];
-      iaqScore += config.subScoreCalculator(item.value) * config.weight;
+      const score = config.subScoreCalculator(item.value);
+
+      sum += score * config.weight;
+      weightSum += config.weight;
     }
 
+    const iaqScore = weightSum ? sum / weightSum : null;
     console.log({ iaqScore: Math.round(iaqScore), moduleId });
   }
 };

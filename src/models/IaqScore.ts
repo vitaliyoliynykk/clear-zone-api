@@ -1,12 +1,5 @@
 import mongoose, { Types, Model } from "mongoose";
-
-export interface IaqScore {
-  ts: Date;
-  meta: {
-    module_id: Types.ObjectId;
-  };
-  score: number;
-}
+import { IaqScore } from "../types";
 
 const IaqScoresSchema = new mongoose.Schema<IaqScore>(
   {

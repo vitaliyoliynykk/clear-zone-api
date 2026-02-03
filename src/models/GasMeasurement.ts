@@ -1,14 +1,5 @@
-import mongoose, { Schema, Types, Model } from "mongoose";
-
-export interface GasMeasurement {
-  ts: Date;
-  meta: {
-    module_id: Types.ObjectId;
-  };
-  gas_resistance: number;
-  humidity: number;
-  uptime_seconds: number;
-}
+import mongoose, { Schema, Model } from "mongoose";
+import { GasMeasurement } from "../types";
 
 const GasMeasurementSchema = new Schema<GasMeasurement>(
   {

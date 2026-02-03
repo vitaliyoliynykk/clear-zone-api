@@ -1,12 +1,5 @@
-import mongoose, { Types, Model } from "mongoose";
-
-export interface VocSensorState {
-  module_id: Types.ObjectId;
-  last_processed_at: Date;
-  baseline_gas_resistance: number;
-  uptime_seconds: number;
-  state: string;
-}
+import mongoose, { Model } from "mongoose";
+import { VocSensorState } from "../types";
 
 const { VOC_SENSOR_STATES } = require("../utils/constants");
 

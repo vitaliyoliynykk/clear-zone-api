@@ -1,4 +1,4 @@
-import { GasMeasurement, GasMeasurementModel } from "../models/GasMeasurement";
+import { GasMeasurementModel } from "../models/GasMeasurement";
 import { VocSensorStateModel } from "../models/VocSensorState";
 import { Worker } from "./worker";
 import dotenv from "dotenv";
@@ -10,6 +10,7 @@ import {
   getVocSensorState,
   getResistanceDeviationDelta,
 } from "../utils/voc-sensor";
+import { GasMeasurement } from "../types";
 
 dotenv.config();
 
