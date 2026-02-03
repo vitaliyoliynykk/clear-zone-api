@@ -1,6 +1,17 @@
-const mongoose = require("mongoose");
+import mongoose, { Types, Model } from "mongoose";
 
-const VocSignalSchema = new mongoose.Schema(
+export interface VocSignal {
+  ts: Date;
+  meta: {
+    module_id: Types.ObjectId;
+  };
+  voc_index: number;
+  deviation?: number;
+  baseline_snapshot?: number;
+  window_sec?: number;
+}
+
+const VocSignalSchema = new mongoose.Schema<VocSignal>(
   {
     ts: {
       type: Date,
@@ -36,4 +47,7 @@ const VocSignalSchema = new mongoose.Schema(
 
 VocSignalSchema.index({ "meta.module_id": 1, ts: 1 });
 
-module.exports = mongoose.model("voc_signals", VocSignalSchema);
+export const VocSignalModel: Model<VocSignal> = mongoose.model<VocSignal>(
+  "voc_signals",
+  VocSignalSchema,
+);

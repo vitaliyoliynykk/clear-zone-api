@@ -1,4 +1,10 @@
-const processInBatches = async (ids, batchSize, processMethod) => {
+import { Types } from "mongoose";
+
+export const processInBatches = async (
+  ids: Types.ObjectId[],
+  batchSize: number,
+  processMethod: (moduleId: Types.ObjectId) => Promise<void>,
+): Promise<void> => {
   if (!ids || !ids.length) return;
 
   for (let i = 0; i < ids.length; i += batchSize) {
@@ -15,5 +21,3 @@ const processInBatches = async (ids, batchSize, processMethod) => {
     );
   }
 };
-
-module.exports = { processInBatches };

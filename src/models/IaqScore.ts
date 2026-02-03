@@ -1,6 +1,14 @@
-const mongoose = require("mongoose");
+import mongoose, { Types, Model } from "mongoose";
 
-const IaqScoresSchema = new mongoose.Schema(
+export interface IaqScore {
+  ts: Date;
+  meta: {
+    module_id: Types.ObjectId;
+  };
+  score: number;
+}
+
+const IaqScoresSchema = new mongoose.Schema<IaqScore>(
   {
     ts: {
       type: Date,
@@ -24,4 +32,7 @@ const IaqScoresSchema = new mongoose.Schema(
 
 IaqScoresSchema.index({ "meta.module_id": 1, ts: 1 });
 
-module.exports = mongoose.model("iaq_scores", IaqScoresSchema);
+export const IaqScoreModel: Model<IaqScore> = mongoose.model<IaqScore>(
+  "iaq_scores",
+  IaqScoresSchema,
+);

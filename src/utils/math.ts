@@ -3,7 +3,8 @@
  *
  * @returns a value or (min, max) if out of range
  */
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+export const clamp = (value: number, min: number, max: number): number =>
+  Math.min(Math.max(value, min), max);
 
 /**
  * Maps a raw sensor value to a normalized sub-score (0–100),
@@ -22,7 +23,11 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
  * @returns {number}
  *   Normalized sub-score in the range 0–100 (higher is better),
  */
-const scoreLowerIsBetter = (x, good, bad) => {
+export const scoreLowerIsBetter = (
+  x: number,
+  good: number,
+  bad: number,
+): number => {
   if (!Number.isFinite(x)) return 0;
   const t = (x - good) / (bad - good);
   return clamp(100 * (1 - clamp(t, 0, 1)), 0, 100);
@@ -50,7 +55,13 @@ const scoreLowerIsBetter = (x, good, bad) => {
  * @returns {number}
  *   Normalized sub-score in the range 0–100 (higher is better),
  */
-const scoreBand = (x, minBad, optMin, optMax, maxBad) => {
+export const scoreBand = (
+  x: number,
+  minBad: number,
+  optMin: number,
+  optMax: number,
+  maxBad: number,
+): number => {
   console.log(Number.isFinite(x));
   if (!Number.isFinite(x)) return 0;
 
@@ -68,5 +79,3 @@ const scoreBand = (x, minBad, optMin, optMax, maxBad) => {
   const t = (x - optMax) / (maxBad - optMax);
   return clamp(100 * (1 - clamp(t, 0, 1)), 0, 100);
 };
-
-module.exports = { clamp, scoreLowerIsBetter, scoreBand };

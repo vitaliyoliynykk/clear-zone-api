@@ -1,15 +1,15 @@
 import { GasMeasurement, GasMeasurementModel } from "../models/GasMeasurement";
+import { VocSensorStateModel } from "../models/VocSensorState";
 import { Worker } from "./worker";
 import dotenv from "dotenv";
-
-const connectDB = require("../config/db");
-const VocSensorState = require("../models/VocSensorState");
-const { VOC_WARM_UP_SEC, VOC_CALIBRATION_SEC } = require("../utils/constants");
-const {
+import { processInBatches } from "../utils/workers";
+import connectDB from "../config/db";
+import { VOC_WARM_UP_SEC, VOC_CALIBRATION_SEC } from "../utils/constants";
+import { Types } from "mongoose";
+import {
   getVocSensorState,
   getResistanceDeviationDelta,
-} = require("../utils/voc-sensor");
-const { processInBatches } = require("../utils/workers");
+} from "../utils/voc-sensor";
 
 dotenv.config();
 
@@ -38,8 +38,8 @@ const calculateAlpha = (data: GasMeasurement): number => {
 
   return alpha;
 };
-const processModule = async (moduleId: string): Promise<void> => {
-  const sensorState = await VocSensorState.findOne({
+const processModule = async (moduleId: Types.ObjectId): Promise<void> => {
+  const sensorState = await VocSensorStateModel.findOne({
     module_id: moduleId,
   });
 
@@ -93,7 +93,7 @@ const processModule = async (moduleId: string): Promise<void> => {
 
       await sensorState.save();
     } else {
-      await VocSensorState.create({
+      await VocSensorStateModel.create({
         state: latestState,
         last_processed_at: latestRow.ts,
         uptime_seconds: latestRow.uptime_seconds,

@@ -1,7 +1,16 @@
-const mongoose = require("mongoose");
+import mongoose, { Types, Model } from "mongoose";
+
+export interface VocSensorState {
+  module_id: Types.ObjectId;
+  last_processed_at: Date;
+  baseline_gas_resistance: number;
+  uptime_seconds: number;
+  state: string;
+}
+
 const { VOC_SENSOR_STATES } = require("../utils/constants");
 
-const VocSensorStateSchema = new mongoose.Schema({
+const VocSensorStateSchema = new mongoose.Schema<VocSensorState>({
   module_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "modules",
@@ -27,4 +36,5 @@ const VocSensorStateSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("voc_sensor_state", VocSensorStateSchema);
+export const VocSensorStateModel: Model<VocSensorState> =
+  mongoose.model<VocSensorState>("voc_sensor_state", VocSensorStateSchema);

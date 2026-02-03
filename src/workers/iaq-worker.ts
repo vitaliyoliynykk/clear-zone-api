@@ -1,11 +1,11 @@
-const connectDB = require("../config/db");
-const IaqScore = require("../models/IaqScore");
-const VocSignal = require("../models/VocSignal");
+import { Worker } from "./worker";
+import connectDB from "../config/db";
+import { scoreLowerIsBetter, scoreBand } from "../utils/math";
+import { processInBatches } from "../utils/workers";
+import { VocSignalModel } from "../models/VocSignal";
+import { Types } from "mongoose";
 
 const Measurement = require("../models/Measurement");
-const { processInBatches } = require("../utils/workers");
-const { Worker } = require("./worker");
-const { scoreLowerIsBetter, scoreBand } = require("../utils/math");
 
 const WORKER_POLLING_MS = 5000; // 30 Seconds
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
@@ -33,7 +33,7 @@ const arrangeDataBySensors = (data) =>
     return acc;
   }, {});
 
-const processModule = async (moduleId) => {
+const processModule = async (moduleId: Types.ObjectId) => {
   const sensorsData = await Measurement.aggregate([
     {
       $match: {
@@ -56,7 +56,7 @@ const processModule = async (moduleId) => {
     },
   ]);
 
-  const vocData = await VocSignal.aggregate([
+  const vocData = await VocSignalModel.aggregate([
     {
       $match: {
         ts: { $gte: tenMinutesAgo },
@@ -81,13 +81,13 @@ const processModule = async (moduleId) => {
     const { hum, co2, temp, pm25, pm10, pm100 } =
       arrangeDataBySensors(sensorsData);
 
-    co2Score = co2SubScore(Number(co2));
-    vocScore = vocSubScore(Number(vocData[0].value));
-    pm10Score = pm10SubScore(Number(pm10));
-    pm25Score = pm25SubScore(Number(pm25));
-    pm100Score = pm100SubScore(Number(pm100));
-    tempScore = tempSubScore(Number(temp));
-    humScore = humSubScore(Number(hum));
+    const co2Score = co2SubScore(Number(co2));
+    const vocScore = vocSubScore(Number(vocData[0].value));
+    const pm10Score = pm10SubScore(Number(pm10));
+    const pm25Score = pm25SubScore(Number(pm25));
+    const pm100Score = pm100SubScore(Number(pm100));
+    const tempScore = tempSubScore(Number(temp));
+    const humScore = humSubScore(Number(hum));
 
     const IAQ =
       pm25Score * 0.35 +
