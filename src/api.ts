@@ -2,10 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-const connectDB = require("./config/db");
-const setupSwagger = require("./config/swagger");
+const { connectDB } = require("./config/db");
 const authMiddleware = require("./middleware/authMiddleware");
-const initWsMqtt = require("./config/wsMqttConfig");
+const { initWsMqtt } = require("./config/wsMqttConfig");
 
 const authRoutes = require("./routes/authRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
@@ -19,7 +18,6 @@ require("dotenv").config();
 const app = express();
 
 connectDB();
-setupSwagger(app);
 
 const allowedOrigins = [process.env.WEB_APP_URL, "http://localhost:5173"];
 

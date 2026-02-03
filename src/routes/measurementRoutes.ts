@@ -1,12 +1,11 @@
-const express = require("express");
-const { Types } = require("mongoose");
+import express from "express";
+import { Types } from "mongoose";
+import { getBinSize, getDateHoursAgo } from "../utils/time";
+import { SENSORS } from "../utils/iaq";
+import { VocSignalModel } from "../models/VocSignal";
 
 const Measurement = require("../models/Measurement");
-const VocSignal = require("../models/VocSignal");
 const Module = require("../models/Module");
-
-const { SENSORS } = require("../utils/constants");
-const { getLookbackDate, getBinSize } = require("../utils/time");
 
 const router = express.Router();
 
@@ -15,12 +14,12 @@ router.get("/aggregated/voc/:deviceId", async (req, res) => {
     const { deviceId } = req.params;
     const { hoursLookback } = req.query;
 
-    const fromDate = getLookbackDate(hoursLookback);
-    const binSize = getBinSize(hoursLookback);
+    const fromDate = getDateHoursAgo(+hoursLookback);
+    const binSize = getBinSize(+hoursLookback);
 
     const module = await Module.findOne({ device_id: deviceId });
 
-    const result = await VocSignal.aggregate([
+    const result = await VocSignalModel.aggregate([
       {
         $match: {
           ts: { $gte: fromDate },
@@ -63,13 +62,13 @@ router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
     const { sensor, deviceId } = req.params;
     const { hoursLookback } = req.query;
 
-    if (!SENSORS.includes(sensor)) {
+    if (!SENSORS.includes(sensor as any)) {
       res.status(400).json({ message: "Invalid sensor" });
       return;
     }
 
-    const fromDate = getLookbackDate(hoursLookback);
-    const binSize = getBinSize(hoursLookback);
+    const fromDate = getDateHoursAgo(+hoursLookback);
+    const binSize = getBinSize(+hoursLookback);
 
     const module = await Module.findOne({ device_id: deviceId });
 
@@ -116,7 +115,9 @@ router.get("/voc/latest/:moduleId", async (req, res) => {
   try {
     const { moduleId } = req.params;
 
-    const latestVoc = await VocSignal.findOne({ "meta.module_id": moduleId })
+    const latestVoc = await VocSignalModel.findOne({
+      "meta.module_id": moduleId,
+    })
       .sort({ ts: -1 })
       .limit(1);
 

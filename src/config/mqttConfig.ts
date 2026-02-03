@@ -1,22 +1,28 @@
 import { GasMeasurementModel } from "../models/GasMeasurement";
+import mqtt from "mqtt";
 
-const mqtt = require("mqtt");
-const Module = require("../models/Module");
+import Module from "../models/Module";
 const Measurement = require("../models/Measurement");
 
-const connectMqtt = (socketsByDevice, lastByDevice) => {
+const connectMqtt = (
+  socketsByDevice: Map<string, Set<any>>,
+  lastByDevice: Map<string, Map<string, string>>,
+) => {
   const mqttClient = mqtt.connect(process.env.HIVE_MQ_HOST, {
     username: process.env.HIVEMQ_USERNAME,
     password: process.env.HIVEMQ_PASS,
   });
 
   mqttClient.on("connect", () => {
+    const qosOne = 1 as const;
+    const qosZero = 0 as const;
+
     const topics = {
-      "devices/+/status": { qos: 1 },
-      "devices/+/temp": { qos: 0 },
-      "devices/+/co2": { qos: 0 },
-      "devices/+/pms": { qos: 0 },
-      "devices/+/bme": { qos: 0 },
+      "devices/+/status": { qos: qosOne },
+      "devices/+/temp": { qos: qosZero },
+      "devices/+/co2": { qos: qosZero },
+      "devices/+/pms": { qos: qosZero },
+      "devices/+/bme": { qos: qosZero },
     };
 
     mqttClient.subscribe(topics, (err) => {
@@ -56,13 +62,13 @@ const connectMqtt = (socketsByDevice, lastByDevice) => {
 };
 
 const handleResendToWs = (
-  deviceId,
-  payload,
-  packet,
-  lastByDevice,
-  socketsByDevice,
-  type,
-) => {
+  deviceId: string,
+  payload: Buffer<ArrayBufferLike>,
+  packet: mqtt.IPublishPacket,
+  lastByDevice: Map<string, Map<string, string>>,
+  socketsByDevice: Map<string, Set<any>>,
+  type: string,
+): void => {
   const msg = JSON.stringify({
     type,
     deviceId,
@@ -87,7 +93,10 @@ const handleResendToWs = (
   }
 };
 
-const handleTemp = async (device_id, payload) => {
+const handleTemp = async (
+  device_id: string,
+  payload: Buffer<ArrayBufferLike>,
+): Promise<void> => {
   const { temp, hum } = JSON.parse(payload.toString());
 
   const module = await Module.findOne({ device_id });
@@ -111,7 +120,10 @@ const handleTemp = async (device_id, payload) => {
   });
 };
 
-const handleCO2 = async (device_id, payload) => {
+const handleCO2 = async (
+  device_id: string,
+  payload: Buffer<ArrayBufferLike>,
+): Promise<void> => {
   const { co2 } = JSON.parse(payload.toString());
 
   const module = await Module.findOne({ device_id });
@@ -126,7 +138,10 @@ const handleCO2 = async (device_id, payload) => {
   });
 };
 
-const handlePMS = async (device_id, payload) => {
+const handlePMS = async (
+  device_id: string,
+  payload: Buffer<ArrayBufferLike>,
+): Promise<void> => {
   const { pm10, pm25, pm100 } = JSON.parse(payload.toString());
 
   const module = await Module.findOne({ device_id });
@@ -159,7 +174,10 @@ const handlePMS = async (device_id, payload) => {
   });
 };
 
-const handleBME = async (device_id, payload) => {
+const handleBME = async (
+  device_id: string,
+  payload: Buffer<ArrayBufferLike>,
+): Promise<void> => {
   const { gas_resistance, sensor_humidity, uptime_seconds } = JSON.parse(
     payload.toString(),
   );
@@ -176,4 +194,4 @@ const handleBME = async (device_id, payload) => {
   });
 };
 
-module.exports = connectMqtt;
+export { connectMqtt };

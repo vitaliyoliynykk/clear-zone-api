@@ -9,7 +9,7 @@ import {
   calculateVocIndex,
 } from "../utils/voc-sensor";
 import { processInBatches } from "../utils/workers";
-import connectDB from "../config/db";
+import { connectDB } from "../config/db";
 
 dotenv.config();
 

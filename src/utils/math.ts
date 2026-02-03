@@ -62,7 +62,6 @@ export const scoreBand = (
   optMax: number,
   maxBad: number,
 ): number => {
-  console.log(Number.isFinite(x));
   if (!Number.isFinite(x)) return 0;
 
   // return 100 if value is in optimal range

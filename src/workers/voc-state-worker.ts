@@ -3,7 +3,7 @@ import { VocSensorStateModel } from "../models/VocSensorState";
 import { Worker } from "./worker";
 import dotenv from "dotenv";
 import { processInBatches } from "../utils/workers";
-import connectDB from "../config/db";
+import { connectDB } from "../config/db";
 import { VOC_WARM_UP_SEC, VOC_CALIBRATION_SEC } from "../utils/constants";
 import { Types } from "mongoose";
 import {

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { SENSORS } = require("../utils/constants");
+const { SENSORS } = require("../utils/iaq");
 
 const MeasurementSchema = new mongoose.Schema(
   {
