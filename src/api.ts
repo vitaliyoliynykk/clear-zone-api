@@ -1,4 +1,7 @@
+import { initWebPush } from "./config/webPush";
+import { PushSubscriptionModel } from "./models/PushSubscriptionModel";
 import { iaqRoutes } from "./routes/iaqRoutes";
+import { webPushRoutes } from "./routes/webPushRoutes";
 
 const express = require("express");
 const cors = require("cors");
@@ -20,6 +23,7 @@ require("dotenv").config();
 const app = express();
 
 connectDB();
+initWebPush();
 
 const allowedOrigins = [process.env.WEB_APP_URL, "http://localhost:5173"];
 
@@ -46,6 +50,7 @@ app.use("/settings", authMiddleware, settingsRoutes);
 app.use("/user", authMiddleware, userRoutes);
 app.use("/measurement", authMiddleware, measurementRoutes);
 app.use("/iaq", authMiddleware, iaqRoutes);
+app.use("/push-notifications", authMiddleware, webPushRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
