@@ -13,7 +13,7 @@
     "prod-api": "nodemon dist/api.js",
     "prod-voc-state-worker": "nodemon dist/workers/voc-state-worker.js",
     "prod-voc-signal-worker": "nodemon dist/workers/voc-signal-worker.js",
-    "prod-iaw-worker": "nodemon dist/workers/iaw-worker.js"
+    "prod-iaq-worker": "nodemon dist/workers/iaq-worker.js"
   },
   "author": "Vitalii Oliinyk",
   "license": "ISC",
