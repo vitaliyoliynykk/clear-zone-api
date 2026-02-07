@@ -10,7 +10,7 @@
     "dev-voc-signal-worker": "ts-node-dev src/workers/voc-signal-worker.ts",
     "dev-iaq-worker": "ts-node-dev src/workers/iaq-worker.ts",
     "build": "tsc",
-    "prod-api": "nodemon dist/api.js",
+    "prod-api": "node dist/api.js",
     "prod-voc-state-worker": "nodemon dist/workers/voc-state-worker.js",
     "prod-voc-signal-worker": "nodemon dist/workers/voc-signal-worker.js",
     "prod-iaq-worker": "nodemon dist/workers/iaq-worker.js"
