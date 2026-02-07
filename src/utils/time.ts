@@ -6,6 +6,9 @@ const getDateMinutesAgo = (minutesAgo: number): Date => {
   return new Date(Date.now() - minutesAgo * 60 * 1000);
 };
 
+const hoursDiff = (date1: Date, date2: Date): number =>
+  Math.abs(date1.getTime() - date2.getTime()) / (1000 * 60 * 60);
+
 const getBinSize = (hoursAgo: number): number => {
   if (hoursAgo <= 6) {
     return 5;
@@ -18,4 +21,4 @@ const getBinSize = (hoursAgo: number): number => {
   }
 };
 
-export { getDateHoursAgo, getBinSize, getDateMinutesAgo };
+export { getDateHoursAgo, getBinSize, getDateMinutesAgo, hoursDiff };
