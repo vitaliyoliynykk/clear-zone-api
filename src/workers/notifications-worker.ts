@@ -1,5 +1,4 @@
 import { Types } from "mongoose";
-import Measurement from "../models/Measurement";
 import { processInBatches } from "../utils/workers";
 import { Worker } from "./worker";
 import { PushSubscriptionModel } from "../models/PushSubscriptionModel";
@@ -7,13 +6,13 @@ import ModuleModel from "../models/Module";
 import { connectDB } from "../config/db";
 import webpush from "web-push";
 import { initWebPush } from "../config/webPush";
-import { getDateHoursAgo, getDateMinutesAgo, hoursDiff } from "../utils/time";
+import { getDateMinutesAgo, hoursDiff } from "../utils/time";
 import { IaqScoreModel } from "../models/IaqScore";
 
 initWebPush();
 connectDB();
 
-const WORKER_POLLING_MS = 5000; // 2 minutes
+const WORKER_POLLING_MS = 120000; // 2 minutes
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
 const DETERIORATION_THRESHOLD = 15;
 const COOLDOWN_HOURS = 2;
@@ -73,6 +72,7 @@ const processModule = async (module_id: Types.ObjectId) => {
   const delta_deterioration = Math.round(iaqPast[0].value - iaqNow[0].value);
 
   if (delta_deterioration > DETERIORATION_THRESHOLD) {
+    console.log(`[${module_id}] IAQ deteriorated - ${delta_deterioration}`);
     const module = await ModuleModel.findOne({ _id: module_id });
 
     const ownerSubscriptions = await PushSubscriptionModel.find({
