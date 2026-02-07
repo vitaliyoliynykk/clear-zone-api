@@ -15,7 +15,7 @@
     "prod-voc-state-worker": "node dist/workers/voc-state-worker.js",
     "prod-voc-signal-worker": "node dist/workers/voc-signal-worker.js",
     "prod-iaq-worker": "node dist/workers/iaq-worker.js",
-    "prod-notifications-worker": "node dist/workers/iaq-worker.js"
+    "prod-notifications-worker": "node dist/workers/notifications-worker.js"
   },
   "author": "Vitalii Oliinyk",
   "license": "ISC",
