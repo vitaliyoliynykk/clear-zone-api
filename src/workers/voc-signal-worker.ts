@@ -11,6 +11,7 @@ import {
 import { processInBatches } from "../utils/workers";
 import { connectDB } from "../config/db";
 import { VocSignal } from "../types";
+import { VOC_WARM_UP_SEC } from "../utils/constants";
 
 dotenv.config();
 
@@ -44,7 +45,12 @@ const processModule = async (moduleId: Types.ObjectId): Promise<void> => {
       module_id: moduleId,
     });
 
-    if (!sensorState || sensorState.baseline_gas_resistance <= 0) return;
+    if (
+      !sensorState ||
+      sensorState.baseline_gas_resistance <= 0 ||
+      sensorState.uptime_seconds <= VOC_WARM_UP_SEC
+    )
+      return;
 
     const newData = await GasMeasurementModel.find(query).sort({ ts: 1 });
 
