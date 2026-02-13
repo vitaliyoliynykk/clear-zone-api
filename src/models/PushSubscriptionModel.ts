@@ -8,7 +8,6 @@ const PushSubscriptionSchema = new Schema<PushSubscription>(
       ref: "users",
       required: true,
       unique: false,
-      default: null,
     },
     endpoint: {
       type: mongoose.Schema.Types.String,
@@ -35,14 +34,28 @@ const PushSubscriptionSchema = new Schema<PushSubscription>(
       required: true,
       default: Date.now,
     },
-    last_used_at: {
-      type: mongoose.Schema.Types.Date,
-      default: null,
-    },
     enabled_alerts: {
       type: mongoose.Schema.Types.Boolean,
       required: true,
       default: true,
+    },
+
+    settings: {
+      // TODO: Move individual setting to separate schema
+      deterioration: {
+        enabled: { type: mongoose.Schema.Types.Boolean, default: true },
+        last_used_at: {
+          type: mongoose.Schema.Types.Date,
+          default: null,
+        },
+      },
+      improvement: {
+        enabled: { type: mongoose.Schema.Types.Boolean, default: true },
+        last_used_at: {
+          type: mongoose.Schema.Types.Date,
+          default: null,
+        },
+      },
     },
   },
   { versionKey: false },

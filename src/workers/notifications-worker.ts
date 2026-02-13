@@ -14,14 +14,15 @@ connectDB();
 
 const WORKER_POLLING_MS = 120000; // 2 minutes
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
-const DETERIORATION_THRESHOLD = 15;
-const COOLDOWN_HOURS = 2;
+const DETERIORATION_THRESHOLD = 10;
+const IMPROVEMENT_THRESHOLD = 15;
+const COOLDOWN_HOURS = 1;
 
 const NotificationsWorker = new Worker(WORKER_POLLING_MS);
 
-const processModule = async (module_id: Types.ObjectId) => {
-  const now = new Date();
-
+const getIaqDifference = async (
+  module_id: Types.ObjectId,
+): Promise<{ now: number; past: number } | null> => {
   const pastWindowStart = getDateMinutesAgo(120);
   const pastWindowEnd = getDateMinutesAgo(110);
 
@@ -67,39 +68,97 @@ const processModule = async (module_id: Types.ObjectId) => {
     },
   ]);
 
-  if (!iaqNow.length || !iaqPast.length) return;
+  if (!iaqNow.length || !iaqPast.length) return null;
 
-  const delta_deterioration = Math.round(iaqPast[0].value - iaqNow[0].value);
+  return { now: iaqNow[0].value, past: iaqPast[0].value };
+};
+
+const handleDeteriorationNotification = async (module_id: Types.ObjectId) => {
+  const iaqIndexes = await getIaqDifference(module_id);
+  if (iaqIndexes === null) return;
+
+  const now = new Date();
+
+  const delta_deterioration = Math.round(iaqIndexes.past - iaqIndexes.now);
 
   if (delta_deterioration > DETERIORATION_THRESHOLD) {
-    console.log(`[${module_id}] IAQ deteriorated - ${delta_deterioration}`);
     const module = await ModuleModel.findOne({ _id: module_id });
 
     const ownerSubscriptions = await PushSubscriptionModel.find({
       user_id: module.owner_id,
     });
 
-    for (const sub of ownerSubscriptions) {
-      if (hoursDiff(now, sub.last_used_at) > COOLDOWN_HOURS) {
+    for (const { settings, endpoint, keys, save } of ownerSubscriptions) {
+      if (
+        settings.deterioration.enabled &&
+        hoursDiff(now, settings.deterioration.last_used_at) > COOLDOWN_HOURS
+      ) {
         try {
           await webpush.sendNotification(
             {
-              endpoint: sub.endpoint,
-              keys: sub.keys,
+              endpoint,
+              keys,
             },
             JSON.stringify({
               title: "Air Quality 🍃",
               body: `The air quality is deteriorating in the ${module.name.toLocaleLowerCase()} 👎`,
             }),
           );
-          sub.last_used_at = new Date();
-          await sub.save();
+          settings.deterioration.last_used_at = new Date();
+          await save();
         } catch (e) {
           console.log(e);
         }
       }
     }
   }
+};
+
+const handleImprovementNotification = async (module_id: Types.ObjectId) => {
+  const iaqIndexes = await getIaqDifference(module_id);
+  if (iaqIndexes === null) return;
+
+  const now = new Date();
+
+  const delta_improvement = Math.round(iaqIndexes.now - iaqIndexes.past);
+
+  if (delta_improvement > IMPROVEMENT_THRESHOLD) {
+    const module = await ModuleModel.findOne({ _id: module_id });
+
+    const ownerSubscriptions = await PushSubscriptionModel.find({
+      user_id: module.owner_id,
+    });
+
+    for (const { settings, endpoint, keys, save } of ownerSubscriptions) {
+      if (
+        settings.improvement.enabled &&
+        hoursDiff(now, settings.improvement.last_used_at) > COOLDOWN_HOURS
+      ) {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint,
+              keys,
+            },
+            JSON.stringify({
+              title: "Air Quality 🍃",
+              body: `The air quality is improving in the ${module.name.toLocaleLowerCase()} 👍`,
+            }),
+          );
+
+          settings.improvement.last_used_at = new Date();
+          await save();
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
+  }
+};
+
+const processModule = async (module_id: Types.ObjectId) => {
+  await handleDeteriorationNotification(module_id);
+  await handleImprovementNotification(module_id);
 };
 
 const handlePushNotifications = async () => {
