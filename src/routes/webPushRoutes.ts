@@ -51,7 +51,6 @@ webPushRoutes.get("", async (req: Request, res: Response) => {
     if (subscription) {
       res.status(200).json({
         enableAlerts: subscription.enabled_alerts,
-        lastUsedAt: subscription.last_used_at,
       });
     } else {
       res.status(204).json({});
@@ -81,13 +80,13 @@ webPushRoutes.get("/test", async (req: Request, res: Response) => {
           endpoint: subscription.endpoint,
           keys: subscription.keys,
         },
+
         JSON.stringify({
           title: "Clear Zone",
           body: "Test push message from API",
         }),
       );
 
-      subscription.last_used_at = new Date();
       await subscription.save();
     }
 
