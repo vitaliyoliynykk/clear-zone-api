@@ -1,6 +1,6 @@
 import express from "express";
 import { Types } from "mongoose";
-import { getBinSize, getDateHoursAgo } from "../utils/time";
+import { getBinSize, getDateHoursAgo, getDateMinutesAgo } from "../utils/time";
 import { SENSORS } from "../utils/iaq";
 import { VocSignalModel } from "../models/VocSignal";
 
@@ -114,8 +114,10 @@ router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
 router.get("/voc/latest/:moduleId", async (req, res) => {
   try {
     const { moduleId } = req.params;
+    const twoMinutesAgo = getDateMinutesAgo(2);
 
     const latestVoc = await VocSignalModel.findOne({
+      ts: { $gte: twoMinutesAgo },
       "meta.module_id": moduleId,
     })
       .sort({ ts: -1 })
