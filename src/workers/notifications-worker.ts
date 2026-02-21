@@ -14,8 +14,8 @@ connectDB();
 
 const WORKER_POLLING_MS = 120000; // 2 minutes
 const MODULES_BATCH_SIZE = 1; // Process each module in parallel
-const DETERIORATION_THRESHOLD = 10;
-const IMPROVEMENT_THRESHOLD = 15;
+const DETERIORATION_THRESHOLD = 5;
+const IMPROVEMENT_THRESHOLD = 5;
 const COOLDOWN_HOURS = 1;
 
 const NotificationsWorker = new Worker(WORKER_POLLING_MS);
@@ -23,8 +23,8 @@ const NotificationsWorker = new Worker(WORKER_POLLING_MS);
 const getIaqDifference = async (
   module_id: Types.ObjectId,
 ): Promise<{ now: number; past: number } | null> => {
-  const pastWindowStart = getDateMinutesAgo(120);
-  const pastWindowEnd = getDateMinutesAgo(110);
+  const pastWindowStart = getDateMinutesAgo(60);
+  const pastWindowEnd = getDateMinutesAgo(50);
 
   const iaqNow = await IaqScoreModel.aggregate([
     {
