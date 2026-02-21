@@ -90,8 +90,9 @@ const handleDeteriorationNotification = async (module_id: Types.ObjectId) => {
 
     for (const { settings, endpoint, keys, save } of ownerSubscriptions) {
       if (
-        settings.deterioration.enabled &&
-        hoursDiff(now, settings.deterioration.last_used_at) > COOLDOWN_HOURS
+        settings.deterioration.enabled && settings.deterioration.last_used_at
+          ? hoursDiff(now, settings.deterioration.last_used_at) > COOLDOWN_HOURS
+          : true
       ) {
         try {
           await webpush.sendNotification(
@@ -131,8 +132,9 @@ const handleImprovementNotification = async (module_id: Types.ObjectId) => {
 
     for (const { settings, endpoint, keys, save } of ownerSubscriptions) {
       if (
-        settings.improvement.enabled &&
-        hoursDiff(now, settings.improvement.last_used_at) > COOLDOWN_HOURS
+        settings.improvement.enabled && settings.improvement.last_used_at
+          ? hoursDiff(now, settings.improvement.last_used_at) > COOLDOWN_HOURS
+          : true
       ) {
         try {
           await webpush.sendNotification(
