@@ -81,6 +81,8 @@ const handleDeteriorationNotification = async (module_id: Types.ObjectId) => {
 
   const delta_deterioration = Math.round(iaqIndexes.past - iaqIndexes.now);
 
+  console.log({ delta_deterioration });
+
   if (delta_deterioration > DETERIORATION_THRESHOLD) {
     const module = await ModuleModel.findOne({ _id: module_id });
 
@@ -88,25 +90,27 @@ const handleDeteriorationNotification = async (module_id: Types.ObjectId) => {
       user_id: module.owner_id,
     });
 
-    for (const { settings, endpoint, keys, save } of ownerSubscriptions) {
+    for (const sub of ownerSubscriptions) {
       if (
-        settings.deterioration.enabled && settings.deterioration.last_used_at
-          ? hoursDiff(now, settings.deterioration.last_used_at) > COOLDOWN_HOURS
+        sub.settings.deterioration.enabled &&
+        sub.settings.deterioration.last_used_at
+          ? hoursDiff(now, sub.settings.deterioration.last_used_at) >
+            COOLDOWN_HOURS
           : true
       ) {
         try {
           await webpush.sendNotification(
             {
-              endpoint,
-              keys,
+              endpoint: sub.endpoint,
+              keys: sub.keys,
             },
             JSON.stringify({
               title: "Air Quality 🍃",
-              body: `The air quality is deteriorating in the ${module.name.toLocaleLowerCase()} 👎`,
+              body: `The air quality is deteriorating in the ${module.name.toLocaleLowerCase()} 👎 (IAQ: ${iaqIndexes.now})`,
             }),
           );
-          settings.deterioration.last_used_at = new Date();
-          await save();
+          sub.settings.deterioration.last_used_at = new Date();
+          await sub.save();
         } catch (e) {
           console.log(e);
         }
@@ -123,6 +127,8 @@ const handleImprovementNotification = async (module_id: Types.ObjectId) => {
 
   const delta_improvement = Math.round(iaqIndexes.now - iaqIndexes.past);
 
+  console.log({ delta_improvement });
+
   if (delta_improvement > IMPROVEMENT_THRESHOLD) {
     const module = await ModuleModel.findOne({ _id: module_id });
 
@@ -130,26 +136,28 @@ const handleImprovementNotification = async (module_id: Types.ObjectId) => {
       user_id: module.owner_id,
     });
 
-    for (const { settings, endpoint, keys, save } of ownerSubscriptions) {
+    for (const sub of ownerSubscriptions) {
       if (
-        settings.improvement.enabled && settings.improvement.last_used_at
-          ? hoursDiff(now, settings.improvement.last_used_at) > COOLDOWN_HOURS
+        sub.settings.improvement.enabled &&
+        sub.settings.improvement.last_used_at
+          ? hoursDiff(now, sub.settings.improvement.last_used_at) >
+            COOLDOWN_HOURS
           : true
       ) {
         try {
           await webpush.sendNotification(
             {
-              endpoint,
-              keys,
+              endpoint: sub.endpoint,
+              keys: sub.keys,
             },
             JSON.stringify({
               title: "Air Quality 🍃",
-              body: `The air quality is improving in the ${module.name.toLocaleLowerCase()} 👍`,
+              body: `The air quality is improving in the ${module.name.toLocaleLowerCase()} 👍 (IAQ: ${iaqIndexes.now})`,
             }),
           );
 
-          settings.improvement.last_used_at = new Date();
-          await save();
+          sub.settings.improvement.last_used_at = new Date();
+          await sub.save();
         } catch (e) {
           console.log(e);
         }
