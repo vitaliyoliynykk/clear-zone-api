@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { getBinSize, getDateHoursAgo, getDateMinutesAgo } from "../utils/time";
 import { SENSORS } from "../utils/iaq";
 import { VocSignalModel } from "../models/VocSignal";
+import { VocSensorStateModel } from "../models/VocSensorState";
 
 const Measurement = require("../models/Measurement");
 const Module = require("../models/Module");
@@ -123,11 +124,14 @@ router.get("/voc/latest/:moduleId", async (req, res) => {
       .sort({ ts: -1 })
       .limit(1);
 
-    res
-      .status(200)
-      .json(
-        latestVoc ? { index: latestVoc.voc_index, date: latestVoc.ts } : null,
-      );
+    const vocState = await VocSensorStateModel.findOne({ module_id: moduleId });
+
+    res.status(200).json({
+      index: latestVoc?.voc_index || null,
+      date: latestVoc?.ts || null,
+      uptimeSeconds: vocState.uptime_seconds,
+      state: vocState.state,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
