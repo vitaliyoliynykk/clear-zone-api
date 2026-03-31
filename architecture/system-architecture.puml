@@ -1,0 +1,35 @@
+@startuml
+
+package "Core" {
+  [API]
+  [ESP32]
+}
+
+package "Client" {
+  ['Clear Zone' Web App]
+  [Push Notifications Service]
+}
+
+' package "Clear Zone Module (ESP32)" {
+'     [WiFi Manager]
+'     [HTTP Manager]
+'     [MQTT Manager]
+'     [BLE Manager]
+'     [Tasks Manager]
+'     [Sensors Manager]
+'     [Preferences]
+' }
+
+cloud "AI Providers" {
+  [OpenAI API]
+}
+
+cloud "MQTT Brokers" {
+  [HiveMQ]
+}
+
+database "MongoDB" {
+}
+
+
+@enduml
