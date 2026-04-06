@@ -81,7 +81,9 @@ const processModule = async (moduleId: Types.ObjectId): Promise<void> => {
         } else {
           const alpha = calculateAlpha(row);
 
-          baseline = (1 - alpha) * baseline + alpha * row.gas_resistance;
+          baseline = Math.round(
+            (1 - alpha) * baseline + alpha * row.gas_resistance,
+          );
         }
       }
     }
