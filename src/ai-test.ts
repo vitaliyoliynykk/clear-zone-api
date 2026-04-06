@@ -7,60 +7,48 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const test = async () => {
+export const getAiAnalysis = async (content: string): Promise<string> => {
   const response = await client.responses.create({
-    model: "gpt-5-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "system",
         content: `
           You are an indoor air quality analyst.
 
-          Your task is to explain the overall IAQ (Indoor Air Quality) score based strictly on provided aggregated sensor data.
+          Explain the IAQ score using only the provided data.
+          Do not invent causes, events, or measurements.
+          Prioritize the worst subscores and metrics that materially lowered the final score.
+          If data is insufficient for a strong conclusion, say so briefly.
 
-          Rules:
-          - Do NOT invent values.
-          - Focus on interpretation.
-          - Highlight main contributing factors.
-          - Provide actionable recommendations.
-          - Respond in structured markdown with sections:
-            - Main Factors
-            - Trend Insight
-            - Recommendations
-        `,
+          Output rules:
+          - Plain text only
+          - Can use emoji
+          - 3 sections exactly:
+          Trend Insight
+          Main Factors
+          Recommendations
+          - 120-170 words
+          - 2-3 recommendations
+          - Mention exact metric values when relevant
+          - Do not ask follow-up questions
+          - Do not use bold markdown
+
+          Interpretation rules:
+          - Lower particulate matter and CO2 are better
+          - VOC Index in range 0-500 (0 is best)
+          - Humidity is best in the mid range, not simply lower
+          - Focus first on pm2.5, CO2, VOC, and humidity unless their values are normal
+          - Use the provided thresholds to classify metric severity when relevant
+          - IAQ Score in range 0-100 (Higher is better)
+          `,
       },
       {
         role: "user",
-        content: JSON.stringify(
-          {
-            iaq_score: 62,
-            time_window: "last 60 minutes",
-            trend_percent: -5,
-            subscores: {
-              co2: 85,
-              pm1: 40,
-              pm25: 38,
-              pm10: 70,
-              humidity: 55,
-              voc: 90,
-            },
-            averages: {
-              co2_ppm: 720,
-              humidity_percent: 64,
-              pm1_ug_m3: 28,
-              pm25_ug_m3: 32,
-              pm10_ug_m3: 18,
-              voc_index: 12,
-            },
-          },
-          null,
-          2,
-        ),
+        content,
       },
     ],
   });
 
-  console.log(response.output_text);
+  return response.output_text;
 };
-
-test();
