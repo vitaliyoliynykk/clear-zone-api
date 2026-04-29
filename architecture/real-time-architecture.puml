@@ -1,0 +1,26 @@
+@startuml
+!theme plain
+
+component "Апаратний модуль" as module {
+  [ESP32 Прошивка]
+}
+
+component "MQTT Брокер" as broker {
+  [HiveMQ Cloud]
+}
+
+component "Сервер" as server {
+  [Express API]
+  [MQTT Client]
+  [WebSocket Server]
+}
+
+component "Клієнт" as client {
+  [React PWA]
+}
+
+[ESP32 Прошивка] --> [HiveMQ Cloud] : MQTTS\n(publish)
+[HiveMQ Cloud] --> [MQTT Client] : MQTTS\n(subscribe)
+[WebSocket Server] --> [React PWA] : WebSocket
+
+@enduml

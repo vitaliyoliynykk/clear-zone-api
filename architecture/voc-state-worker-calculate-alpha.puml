@@ -1,0 +1,22 @@
+@startuml
+!theme plain
+start
+
+:Отримати дані сенсора;
+
+if (Час роботи сенсора <= Час калібрування) then (так)
+  :alpha = ALPHA_CALIBRATING;
+else (ні)
+  :alpha = ALPHA_READY;
+endif
+
+if (Вологість > Поріг вологості?) then (так)
+  :Понизити alpha через високу вологість;
+  :return alpha * 0.02;
+  stop
+else (ні)
+  :return alpha;
+  stop
+endif
+
+@enduml

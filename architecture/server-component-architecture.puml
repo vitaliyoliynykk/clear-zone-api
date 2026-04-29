@@ -1,0 +1,35 @@
+@startuml
+!theme plain
+title Структура бази даних
+
+class User {
+  + _id: ObjectId <<PK>>
+  + email: string
+  + name: string
+  + password_hash: string
+  + refresh_token: string
+}
+
+class Module {
+  + _id: ObjectId <<PK>>
+  + device_id: string
+  + name: string
+  + owner_id: ObjectId <<FK>>
+  + registration_date: Date
+}
+
+class VOCSensorState {
+  + _id: ObjectId <<PK>>
+  + module_id: ObjectId <<FK>>
+  + baseline_gas_resistance: number
+  + uptime_seconds: number
+  + last_processed_at: Date
+}
+
+' 1 до 0..* (один користувач — багато модулів)
+User "1" --o{ "0..*" Module : owner_id
+
+' 1 до 0..1 (один модуль — один або жодного стану VOC)
+Module "1" -- "0..1" VOCSensorState : module_id
+
+@enduml

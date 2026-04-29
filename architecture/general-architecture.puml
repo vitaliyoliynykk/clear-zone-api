@@ -1,0 +1,91 @@
+@startuml
+' !theme plain
+
+left to right direction
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+
+
+cloud "Зовнішні сервіси" {
+  component "MQTT Broker" as mqttbroker {
+  }
+
+'   component "AI Provider" as anthropic {
+'     [AI Аналітика]
+'   }
+}
+
+node "Апаратний модуль" as esp32 {
+    component "MQTT Client" as espmqttclient {
+  }
+'   component "Вбудоване ПЗ ESP32" as firmware {
+'     [Зчитування сенсорів]
+'     [Агрегація даних]
+'     [MQTT Client]
+'     [BLE Server]
+'   }
+
+'   component "Сенсорний комплект" as sensors {
+'     [PMS5003]
+'     [SCD41]
+'     [BME680]
+'     [SHT31]
+'   }
+}
+
+node "Сервер" as server {
+  component "Express REST API" as api {
+  }
+
+  component "Services" as services {
+    [Notification]
+    [VOC]
+    [IAQ]
+  }
+
+  component "WebSocket Client" as wsclient {
+  }
+  component "MQTT Client" as servermqttclient {
+  }
+}
+
+  database "MongoDB" as mongodb {
+  }
+
+node "Клієнт" as client {
+  component "WebSocket" as wsbrowser {
+  }
+  component "HTTP" as httpbrowser {
+  }
+}
+
+' Комунікація
+[espmqttclient] --> [mqttbroker]: Publish
+[servermqttclient] --> [mqttbroker]: Subscribe
+[servermqttclient] --> [mongodb]: Save
+[servermqttclient] --> [wsclient]
+[wsclient] --> [wsbrowser]
+[services] --> [mongodb]: Read/Write
+[api] --> [mongodb]: Read/Write
+[api] --> [httpbrowser]
+
+' [MQTT Client] --> [MQTT Брокер] : MQTTS
+' [MQTT Брокер] --> [Message Handler] : MQTTS
+' [Message Handler] --> [IAQ Calculator]
+' [Message Handler] --> [VOC Processor]
+' [Message Handler] --> [MongoDB] : зберігання
+' [IAQ Calculator] --> [MongoDB]
+
+' [REST Endpoints] --> [MongoDB] : CRUD
+' [JWT Auth] --> [MongoDB] : Users
+' [WebSocket Server] --> [WebSocket Client] : WSS
+' [REST Endpoints] --> [REST Client] : HTTPS
+' [AI Аналітика] --> [REST Endpoints] : аналіз даних
+' [REST Endpoints] --> [AI Аналітика] : запит
+
+' [Push Notifications] --> [Push Handler] : Web Push
+' [Web Bluetooth] --> [BLE Server] : BLE
+
+@enduml
