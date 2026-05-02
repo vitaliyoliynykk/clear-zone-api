@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+
+' skinparam queue {
+'   BackgroundColor #EAF3DE
+'   BorderColor #3B6D11
+' }
+
+rectangle "Апаратаний модуль ESP32" {
+  component "MqttTask" as mqtt
+  component "AuthTask" as auth
+  component "SensorsTask" as sensors
+  component "PmsPollingTask" as pms
+
+  queue "authQueue\n[1]" as authQ
+  queue "enableSensorsQueue\n[1]" as enableSensQ
+  queue "enablePmsQueue\n[1]" as enablePmsQ
+
+  rectangle "sensorQueueSet" {
+    queue "sht31Queue\n[4]" as sht31Q
+    queue "co2Queue\n[1]" as co2Q
+    queue "pmsQueue\n[4]" as pmsQ
+    queue "bmeQueue\n[4]" as bmeQ
+  }
+
+}
+
+mqtt --> authQ 
+authQ --> auth 
+
+auth --> enableSensQ 
+auth --> enablePmsQ 
+
+enableSensQ --> sensors 
+enablePmsQ --> pms 
+
+sensors --> sht31Q 
+sensors --> co2Q 
+sensors --> pmsQ
+sensors --> bmeQ 
+
+sht31Q --> mqtt 
+co2Q --> mqtt 
+pmsQ --> mqtt 
+bmeQ --> mqtt 
+
+@enduml
