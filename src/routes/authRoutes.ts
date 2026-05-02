@@ -124,4 +124,8 @@ router.post("/logout", async (req, res) => {
   }
 });
 
+router.get("/health-check", async (req, res) => {
+  res.status(200).json({ message: "Clear Zone server is working!" });
+});
+
 module.exports = router;
