@@ -1,0 +1,74 @@
+@startuml
+!theme plain
+' skinparam linetype ortho
+top to bottom direction
+
+
+class "Express App" as App
+
+package "Public Routes" {
+  class AuthRouter {
+    + register : POST /auth/register
+    + login : POST /auth/login
+    + refresh : POST /auth/refresh
+    + logout : POST /auth/logout
+    + healthCheck : GET /auth/health-check
+  }
+
+  class ModuleAuthRouter {
+    + registerModule : POST /module-auth/register-module
+    + me : POST /module-auth/me
+  }
+}
+
+package "Protected Routes" {
+  class ModuleRouter {
+    + linkModule : POST /module/link/:moduleId
+    + getAll : GET /module/all
+    + deleteModule : DELETE /module/:moduleId
+  }
+
+  class UserRouter {
+    + getUser : GET /user
+    + updateUser : PUT /user
+  }
+
+  class MeasurementRouter {
+    + getAggregatedVoc : GET /measurement/aggregated/voc/:deviceId
+    + getAggregatedSensor : GET /measurement/aggregated/:deviceId/:sensor
+    + getLatestVoc : GET /measurement/voc/latest/:moduleId
+  }
+
+  class IaqRouter {
+    + getScores : GET /iaq
+  }
+
+  class WebPushRouter {
+    + subscribe : POST /push-notifications/subscribe
+    + getSubscription : GET /push-notifications
+    + testNotification : GET /push-notifications/test
+  }
+
+class AiRouter {
+    + generateSummary : Get /ai/:deviceId
+    + loadSummary : GET ai/:deviceId/:date
+  }
+}
+
+class AuthMiddleware {
+  + verifyToken : Bearer token
+  + requireUserScope : scope = user
+}
+
+App -down-> AuthRouter
+AuthRouter -down-> ModuleAuthRouter
+App -down-> AuthMiddleware
+
+AuthMiddleware --> ModuleRouter
+AuthMiddleware --> UserRouter
+AuthMiddleware --> MeasurementRouter
+AuthMiddleware --> IaqRouter
+AuthMiddleware --> WebPushRouter
+AuthMiddleware --> AiRouter
+
+@enduml

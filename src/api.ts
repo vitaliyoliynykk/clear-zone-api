@@ -53,7 +53,7 @@ app.use("/push-notifications", authMiddleware, webPushRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`FlowTrack API listening on port ${PORT}`);
+  console.log(`API listening on port ${PORT}`);
 });
 
 initWsMqtt();
