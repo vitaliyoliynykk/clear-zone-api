@@ -9,7 +9,7 @@ import { Types } from "mongoose";
 import {
   getVocSensorState,
   getResistanceDeviationDelta,
-} from "../utils/voc-sensor";
+} from "../utils/vocSensor";
 import { GasMeasurement } from "../types";
 
 dotenv.config();

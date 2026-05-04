@@ -7,7 +7,7 @@ import { Types } from "mongoose";
 import {
   getResistanceDeviationDelta,
   calculateVocIndex,
-} from "../utils/voc-sensor";
+} from "../utils/vocSensor";
 import { processInBatches } from "../utils/workers";
 import { connectDB } from "../config/db";
 import { VocSignal } from "../types";

@@ -1,4 +1,5 @@
 import { initWebPush } from "./config/webPush";
+import { aiRoutes } from "./routes/aiRoutes";
 import { iaqRoutes } from "./routes/iaqRoutes";
 import { webPushRoutes } from "./routes/webPushRoutes";
 
@@ -50,8 +51,10 @@ app.use("/user", authMiddleware, userRoutes);
 app.use("/measurement", authMiddleware, measurementRoutes);
 app.use("/iaq", authMiddleware, iaqRoutes);
 app.use("/push-notifications", authMiddleware, webPushRoutes);
+app.use("/ai", authMiddleware, aiRoutes);
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`API listening on port ${PORT}`);
 });
