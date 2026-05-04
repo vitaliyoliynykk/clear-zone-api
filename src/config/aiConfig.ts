@@ -22,8 +22,8 @@ export const getAiAnalysis = async (content: string): Promise<string> => {
           If data is insufficient for a strong conclusion, say so briefly.
 
           Output rules:
-          - Plain text only
-          - Can use emoji
+          - Use Markdown
+          - Use emoji
           - 3 sections exactly:
           Trend Insight
           Main Factors

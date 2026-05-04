@@ -1,3 +1,5 @@
+const HOUR_IN_MS = 60 * 60 * 1000;
+
 const getDateHoursAgo = (hoursAgo: number): Date => {
   return new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
 };
@@ -21,4 +23,19 @@ const getBinSize = (hoursAgo: number): number => {
   }
 };
 
-export { getDateHoursAgo, getBinSize, getDateMinutesAgo, hoursDiff };
+const buildWindowDateRange = (hoursAgo: number) => {
+  const now = new Date();
+  const currentFrom = new Date(now.getTime() - hoursAgo * HOUR_IN_MS);
+  const previousFrom = new Date(now.getTime() - hoursAgo * 2 * HOUR_IN_MS);
+
+  return { now, currentFrom, previousFrom };
+};
+
+export {
+  getDateHoursAgo,
+  getBinSize,
+  getDateMinutesAgo,
+  hoursDiff,
+  buildWindowDateRange,
+  HOUR_IN_MS,
+};
