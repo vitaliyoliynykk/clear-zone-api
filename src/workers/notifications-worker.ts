@@ -106,7 +106,7 @@ const handleDeteriorationNotification = async (module_id: Types.ObjectId) => {
             },
             JSON.stringify({
               title: "Air Quality 🍃",
-              body: `The air quality is deteriorating in the ${module.name.toLocaleLowerCase()} 👎 (IAQ: ${iaqIndexes.now})`,
+              body: `The air quality is deteriorating in the ${module.name.toLocaleLowerCase()} 👎 (IAQ: ${Math.ceil(iaqIndexes.now)})`,
             }),
           );
           sub.settings.deterioration.last_used_at = new Date();
@@ -152,7 +152,7 @@ const handleImprovementNotification = async (module_id: Types.ObjectId) => {
             },
             JSON.stringify({
               title: "Air Quality 🍃",
-              body: `The air quality is improving in the ${module.name.toLocaleLowerCase()} 👍 (IAQ: ${iaqIndexes.now})`,
+              body: `The air quality is improving in the ${module.name.toLocaleLowerCase()} 👍 (IAQ: ${Math.ceil(iaqIndexes.now)})`,
             }),
           );
 
