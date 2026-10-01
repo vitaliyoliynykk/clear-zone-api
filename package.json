@@ -27,12 +27,12 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.12.1",
-    "mqtt": "^5.15.1",
+    "mqtt": "^5.16.0",
     "openai": "^6.33.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "web-push": "^3.6.7",
-    "ws": "^8.20.0"
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

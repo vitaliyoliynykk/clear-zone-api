@@ -1,0 +1,43 @@
+@startuml
+
+actor User
+boundary "React PWA Client" as Client
+control "Web Bluetooth API" as WebAPI
+entity "ESP32 Hardware Module" as ESP
+entity "Wi-Fi Network" as WiFi
+control "Node.js Server" as Server
+
+== Device Discovery and Connection ==
+User -> Client : Press "Add Device" button
+Client -> WebAPI : Start BLE device scan
+WebAPI --> Client : Return list of available BLE devices
+User -> Client : Select Clear Zone device
+Client -> WebAPI : Send connection request to device
+WebAPI -> ESP : Send connection request to device
+ESP --> WebAPI : Send connection status message
+WebAPI --> Client : Send connection status message
+Client ->> User : Display device name and connection status
+
+== Wi-Fi Network Scan ==
+Client -> WebAPI : Send Wi-Fi network scan request
+WebAPI -> ESP : Send Wi-Fi network scan request
+ESP -> WiFi : Send Wi-Fi network scan request
+WiFi --> ESP : Return list of available networks
+ESP --> WebAPI : Send list of available networks
+WebAPI --> Client : Send list of available networks
+Client ->> User : Display list of available networks
+
+== Wi-Fi Network Connection ==
+User -> Client : Select network and enter password
+Client -> WebAPI : Send SSID and password
+WebAPI -> ESP : Send SSID and password
+ESP -> WiFi : Send connection request
+WiFi --> ESP : Send connection status message
+ESP -> Server : Send device registration request
+Server --> ESP : Send JWT and HiveMQ credentials
+ESP --> WebAPI : Send registration status message
+WebAPI --> Client : Send registration status message
+Client -> Server : Send request to link device to user account
+Server --> Client : Send registration status message
+Client ->> User : Display registration status message
+@enduml
