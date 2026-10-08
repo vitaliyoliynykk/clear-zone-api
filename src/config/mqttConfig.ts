@@ -69,11 +69,19 @@ const handleResendToWs = (
   socketsByDevice: Map<string, Set<any>>,
   type: string,
 ): void => {
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(payload.toString());
+  } catch (error) {
+    console.error("Invalid MQTT payload", { deviceId, type, error });
+    return;
+  }
+
   const msg = JSON.stringify({
     type,
     deviceId,
     ts: Date.now(),
-    data: JSON.parse(payload.toString()),
+    data,
     retained: Boolean(packet?.retain),
   });
 
@@ -97,7 +105,14 @@ const handleTemp = async (
   device_id: string,
   payload: Buffer<ArrayBufferLike>,
 ): Promise<void> => {
-  const { temp, hum } = JSON.parse(payload.toString());
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(payload.toString());
+  } catch (error) {
+    console.error("Invalid MQTT temp payload", { device_id, error });
+    return;
+  }
+  const { temp, hum } = data;
 
   const module = await Module.findOne({ device_id });
 
@@ -124,7 +139,14 @@ const handleCO2 = async (
   device_id: string,
   payload: Buffer<ArrayBufferLike>,
 ): Promise<void> => {
-  const { co2 } = JSON.parse(payload.toString());
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(payload.toString());
+  } catch (error) {
+    console.error("Invalid MQTT co2 payload", { device_id, error });
+    return;
+  }
+  const { co2 } = data;
 
   const module = await Module.findOne({ device_id });
 
@@ -142,7 +164,14 @@ const handlePMS = async (
   device_id: string,
   payload: Buffer<ArrayBufferLike>,
 ): Promise<void> => {
-  const { pm10, pm25, pm100 } = JSON.parse(payload.toString());
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(payload.toString());
+  } catch (error) {
+    console.error("Invalid MQTT pms payload", { device_id, error });
+    return;
+  }
+  const { pm10, pm25, pm100 } = data;
 
   const module = await Module.findOne({ device_id });
 
@@ -178,9 +207,14 @@ const handleBME = async (
   device_id: string,
   payload: Buffer<ArrayBufferLike>,
 ): Promise<void> => {
-  const { gas_resistance, sensor_humidity, uptime_seconds } = JSON.parse(
-    payload.toString(),
-  );
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(payload.toString());
+  } catch (error) {
+    console.error("Invalid MQTT bme payload", { device_id, error });
+    return;
+  }
+  const { gas_resistance, sensor_humidity, uptime_seconds } = data;
 
   const module = await Module.findOne({ device_id });
 
