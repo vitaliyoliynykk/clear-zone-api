@@ -12,7 +12,15 @@ const VocSensorStateSchema = new mongoose.Schema<VocSensorState>({
   },
   baseline_gas_resistance: {
     type: Number,
-    required: true,
+    default: null,
+  },
+  baseline_initialization_started_at: {
+    type: Date,
+    default: null,
+  },
+  baseline_initialization_samples: {
+    type: [Number],
+    default: [],
   },
   state: {
     type: String,

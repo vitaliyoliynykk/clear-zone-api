@@ -47,6 +47,8 @@ const processModule = async (moduleId: Types.ObjectId): Promise<void> => {
 
     if (
       !sensorState ||
+      sensorState.baseline_gas_resistance == null ||
+      !Number.isFinite(sensorState.baseline_gas_resistance) ||
       sensorState.baseline_gas_resistance <= 0 ||
       sensorState.uptime_seconds <= VOC_WARM_UP_SEC
     )
