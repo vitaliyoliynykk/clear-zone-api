@@ -11,6 +11,11 @@ const getDateMinutesAgo = (minutesAgo: number): Date => {
 const hoursDiff = (date1: Date, date2: Date): number =>
   Math.abs(date1.getTime() - date2.getTime()) / (1000 * 60 * 60);
 
+/**
+ *
+ * @param hoursAgo
+ * @returns aggregation interval in minutes
+ */
 const getBinSize = (hoursAgo: number): number => {
   if (hoursAgo <= 6) {
     return 5;

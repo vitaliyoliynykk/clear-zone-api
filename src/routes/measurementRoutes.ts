@@ -101,6 +101,21 @@ router.get("/aggregated/:deviceId/:sensor", async (req, res) => {
         },
       },
       {
+        $densify: {
+          field: "date",
+          range: {
+            step: binSize,
+            unit: "minute",
+            bounds: "full",
+          },
+        },
+      },
+      {
+        $set: {
+          value: { $ifNull: ["$value", null] },
+        },
+      },
+      {
         $sort: { date: 1 },
       },
     ]);
