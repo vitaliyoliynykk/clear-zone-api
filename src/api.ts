@@ -21,6 +21,7 @@ const measurementRoutes = require("./routes/measurementRoutes");
 require("dotenv").config();
 
 const app = express();
+app.set("query parser", "extended");
 
 connectDB();
 initWebPush();
