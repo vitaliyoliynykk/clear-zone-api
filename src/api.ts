@@ -36,6 +36,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
