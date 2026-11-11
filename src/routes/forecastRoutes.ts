@@ -69,7 +69,16 @@ forecastRoutes.get("/", async (req: Request, res: Response) => {
       return;
     }
 
-    const window = prepareWindow(resampledData, WINDOW_SIZE, scaler);
+    let window: number[][];
+
+    try {
+      window = prepareWindow(resampledData, WINDOW_SIZE, scaler);
+    } catch (error) {
+      console.error(error.message);
+      res.status(400).json({ message: "Not enough data for forecasting" });
+      return;
+    }
+
     const input = new ort.Tensor("float32", Float32Array.from(window.flat()), [
       1,
       WINDOW_SIZE,
