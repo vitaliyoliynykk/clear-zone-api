@@ -210,8 +210,13 @@ const handleBME = async (
   let data: Record<string, any>;
   try {
     data = JSON.parse(payload.toString());
+    if (data.data.sensor_humidity || data.data.gas_resistance) {
+      console.error("Invalid MQTT bme payload", { device_id, data });
+
+      return;
+    }
   } catch (error) {
-    console.error("Invalid MQTT bme payload", { device_id, error });
+    console.error("Invalid MQTT bme payload", { device_id, error, data });
     return;
   }
   const { gas_resistance, sensor_humidity, uptime_seconds } = data;
