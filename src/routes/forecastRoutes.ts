@@ -5,9 +5,41 @@ import Measurement from "../models/Measurement";
 import { prepareWindow, resampleData } from "../utils/prepareMeasurementData";
 import * as ort from "onnxruntime-node";
 import path from "node:path";
+import { readdir } from "node:fs/promises";
 import { ModelMetadata, Scaler } from "../types";
 
 const forecastRoutes = Router();
+
+forecastRoutes.get("/models", async (_req: Request, res: Response) => {
+  try {
+    const modelsDirectory = path.resolve(__dirname, "../../src/forecast-models");
+    const entries = await readdir(modelsDirectory, { withFileTypes: true });
+    const metadata: ModelMetadata[] = [];
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+
+      const modelDirectory = path.join(modelsDirectory, entry.name);
+      const files = await readdir(modelDirectory);
+      if (
+        !files.includes(`${entry.name}.onnx`) ||
+        !files.includes(`${entry.name}_scaler.json`) ||
+        !files.includes(`${entry.name}_metadata.json`)
+      ) {
+        continue;
+      }
+
+      metadata.push(
+        require(path.join(modelDirectory, `${entry.name}_metadata.json`)) as ModelMetadata,
+      );
+    }
+
+    res.status(200).json(metadata);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 forecastRoutes.get("/", async (req: Request, res: Response) => {
   try {
