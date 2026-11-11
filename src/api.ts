@@ -1,5 +1,6 @@
 import { initWebPush } from "./config/webPush";
 import { aiRoutes } from "./routes/aiRoutes";
+import { forecastRoutes } from "./routes/forecastRoutes";
 import { iaqRoutes } from "./routes/iaqRoutes";
 import { webPushRoutes } from "./routes/webPushRoutes";
 
@@ -54,6 +55,7 @@ app.use("/measurement", authMiddleware, measurementRoutes);
 app.use("/iaq", authMiddleware, iaqRoutes);
 app.use("/push-notifications", authMiddleware, webPushRoutes);
 app.use("/ai", authMiddleware, aiRoutes);
+app.use("/forecast", authMiddleware, forecastRoutes);
 
 const PORT = process.env.PORT || 5000;
 
