@@ -116,23 +116,31 @@ const handleTemp = async (
 
   const module = await Module.findOne({ device_id });
 
-  await Measurement.create({
-    meta: {
-      module_id: module._id,
-    },
-    sensor: "temp",
-    value: temp,
-    unit: "C",
-  });
+  if (typeof temp === "number") {
+    await Measurement.create({
+      meta: {
+        module_id: module._id,
+      },
+      sensor: "temp",
+      value: temp,
+      unit: "C",
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", { temp, device_id });
+  }
 
-  await Measurement.create({
-    meta: {
-      module_id: module._id,
-    },
-    sensor: "hum",
-    value: hum,
-    unit: "RH",
-  });
+  if (typeof hum === "number") {
+    await Measurement.create({
+      meta: {
+        module_id: module._id,
+      },
+      sensor: "hum",
+      value: hum,
+      unit: "RH",
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", { hum, device_id });
+  }
 };
 
 const handleCO2 = async (
@@ -150,14 +158,18 @@ const handleCO2 = async (
 
   const module = await Module.findOne({ device_id });
 
-  await Measurement.create({
-    meta: {
-      module_id: module._id,
-    },
-    sensor: "co2",
-    value: co2,
-    unit: "ppm",
-  });
+  if (typeof co2 === "number") {
+    await Measurement.create({
+      meta: {
+        module_id: module._id,
+      },
+      sensor: "co2",
+      value: co2,
+      unit: "ppm",
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", { co2, device_id });
+  }
 };
 
 const handlePMS = async (
@@ -175,32 +187,44 @@ const handlePMS = async (
 
   const module = await Module.findOne({ device_id });
 
-  await Measurement.create({
-    meta: {
-      module_id: module._id,
-    },
-    sensor: "pm10",
-    value: pm10,
-    unit: "µg/m³",
-  });
+  if (typeof pm10 === "number") {
+    await Measurement.create({
+      meta: {
+        module_id: module._id,
+      },
+      sensor: "pm10",
+      value: pm10,
+      unit: "µg/m³",
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", { pm10, device_id });
+  }
 
-  await Measurement.create({
-    meta: {
-      module_id: module._id,
-    },
-    sensor: "pm25",
-    value: pm25,
-    unit: "µg/m³",
-  });
+  if (typeof pm25 === "number") {
+    await Measurement.create({
+      meta: {
+        module_id: module._id,
+      },
+      sensor: "pm25",
+      value: pm25,
+      unit: "µg/m³",
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", { pm25, device_id });
+  }
 
-  await Measurement.create({
-    meta: {
-      module_id: module._id,
-    },
-    sensor: "pm100",
-    value: pm100,
-    unit: "µg/m³",
-  });
+  if (typeof pm100 === "number") {
+    await Measurement.create({
+      meta: {
+        module_id: module._id,
+      },
+      sensor: "pm100",
+      value: pm100,
+      unit: "µg/m³",
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", { pm100, device_id });
+  }
 };
 
 const handleBME = async (
@@ -210,12 +234,6 @@ const handleBME = async (
   let data: Record<string, any>;
   try {
     data = JSON.parse(payload.toString());
-
-    if (!data.sensor_humidity || !data.gas_resistance) {
-      console.error("Invalid MQTT bme payload", { device_id, data });
-
-      return;
-    }
   } catch (error) {
     console.error("Invalid MQTT bme payload", { device_id, error, data });
     return;
@@ -225,14 +243,27 @@ const handleBME = async (
 
   const module = await Module.findOne({ device_id });
 
-  await GasMeasurementModel.create({
-    meta: {
-      module_id: module._id,
-    },
-    gas_resistance,
-    humidity: sensor_humidity,
-    uptime_seconds,
-  });
+  if (
+    typeof gas_resistance === "number" &&
+    typeof sensor_humidity === "number" &&
+    typeof uptime_seconds === "number"
+  ) {
+    await GasMeasurementModel.create({
+      meta: {
+        module_id: module._id,
+      },
+      gas_resistance,
+      humidity: sensor_humidity,
+      uptime_seconds,
+    });
+  } else {
+    console.error("[MQTT] Invalid payload", {
+      gas_resistance,
+      sensor_humidity,
+      uptime_seconds,
+      device_id,
+    });
+  }
 };
 
 export { connectMqtt };
