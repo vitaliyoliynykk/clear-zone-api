@@ -1,3 +1,5 @@
+import { Scaler } from "../types";
+
 export const FORECAST_SENSORS = ["co2", "temp", "hum"] as const;
 
 export type ForecastSensor = (typeof FORECAST_SENSORS)[number];
@@ -6,12 +8,6 @@ export interface MeasurementRow {
   ts: Date | string;
   sensor: string;
   value: number;
-}
-
-export interface Scaler {
-  features: Array<"co2" | "temp" | "hum">;
-  mean: number[];
-  scale: number[];
 }
 
 export type ResampledRow = {

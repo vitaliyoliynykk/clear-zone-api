@@ -4,3 +4,5 @@ export * from "./iaq-score-type";
 export * from "./voc-sensor-state-type";
 export * from "./voc-signal-type";
 export * from "./push-subscription-type";
+export * from "./scaler-type";
+export * from "./model-metadata-type";
