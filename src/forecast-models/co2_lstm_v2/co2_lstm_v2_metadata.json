@@ -1,0 +1,34 @@
+{
+  "model_name": "co2_lstm_v2",
+  "window_size": 180,
+  "forecast_horizons_minutes": [60, 120, 180],
+  "features": [
+    "co2",
+    "temp",
+    "hum",
+    "hour_sin",
+    "hour_cos",
+    "day_sin",
+    "day_cos"
+  ],
+  "num_params": 8419,
+  "test_metrics": {
+    "60_minutes": {
+      "mae": 136.95335208779957,
+      "mse": 30212.087480497663,
+      "rmse": 173.81624630769605
+    },
+    "120_minutes": {
+      "mae": 161.4656200325263,
+      "mse": 42708.807112603645,
+      "rmse": 206.66109240155401
+    },
+    "180_minutes": {
+      "mae": 185.35129454406118,
+      "mse": 53825.64494608108,
+      "rmse": 232.00354511533027
+    }
+  },
+  "unit": "ppm",
+  "target_value": "co2"
+}
